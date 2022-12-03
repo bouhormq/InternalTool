@@ -63,34 +63,26 @@ export const AuthContextProvider = ({ children }) => {
     const colRefClietns = collection(db, "clients" )
     const colRefWarehouses = collection(db, "warehouses" )
     const colRefFlows = collection(db, "flow" )
-    let isMounted = true;
     onSnapshot(colRefFlows, (snapshot) => {
       setnumberFlows(snapshot.size)
     })
     onSnapshot(colRefClietns, (snapshot) => {
       setClients([])
-      if (isMounted) {
         let clients = {};
         snapshot.docs.forEach((doc) => {
           clients[doc.id] = doc.data()
           setClients(clients)
         })
-      }
     })
     onSnapshot(colRefWarehouses, (snapshot) => {
       setWarehouses([])
-      if (isMounted) {
         let warehouse = {};
         snapshot.docs.forEach((doc) => {
           warehouse[doc.id] = doc.data()
           setWarehouses(warehouse)
         })
-      }
     })
-    return () => {
-      isMounted = false;
-    };
-  })
+  }, [])
 
   return (
     <AuthContext.Provider value={{ googleSignIn, logOut, user, accessToken, numberFlows, clients, warehouses}}>
