@@ -11,8 +11,7 @@ import { useState } from 'react'
 import { v4 as uuidv4 } from 'uuid';
 import { setDoc } from 'firebase/firestore'
 import { collection, onSnapshot, query, orderBy,where } from 'firebase/firestore';
-
-
+import ClientForm from './clientForm'
 
 
 
@@ -245,22 +244,30 @@ function ClientsTable({ columns, data }) {
     const colRef = collection(db, "clients" )
     const colRef2 = collection(db, "warehouses" )
     //real time update
+    let isMounted = true;
     onSnapshot(colRef, (snapshot) => {
       setClients([])
-      let clients = {};
-      snapshot.docs.forEach((doc) => {
-        clients[doc.id] = doc.data()
-        setClients(clients)
-      })
+      if (isMounted) {
+        let clients = {};
+        snapshot.docs.forEach((doc) => {
+          clients[doc.id] = doc.data()
+          setClients(clients)
+        })
+    }
     })
     onSnapshot(colRef2, (snapshot) => {
       setWarehouses([])
-      let warehouse = {};
-      snapshot.docs.forEach((doc) => {
-        warehouse[doc.id] = doc.data()
-        setWarehouses(warehouse)
-      })
+      if (isMounted) {
+        let warehouse = {};
+          snapshot.docs.forEach((doc) => {
+            warehouse[doc.id] = doc.data()
+            setWarehouses(warehouse)
+          })
+        }
     })
+    return () => {
+      isMounted = false;
+    };
     }, [])
   
   // Use the state and functions returned from useTable to build your UI

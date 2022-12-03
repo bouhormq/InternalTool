@@ -28,28 +28,38 @@ export function Returns() {
     const colRef1 = collection(db, "clients" )
     const colRef2 = collection(db, "warehouses" )
     const q = query(colRef,where("fulfillment_status", "in", ["open","in_progress"]));
+    let isMounted = true;
     onSnapshot(q, (snapshot) => {
         setData([])
-        snapshot.docs.forEach((doc) => {
-          setData((prev) => [ doc.data() , ...prev])
-        })
+        if (isMounted) {
+          snapshot.docs.forEach((doc) => {
+            setData((prev) => [ doc.data() , ...prev])
+          })
+        }
     })   
     onSnapshot(colRef1, (snapshot) => {
       setClients([])
+      if (isMounted) {
       let clients = {};
-      snapshot.docs.forEach((doc) => {
-        clients[doc.id] = doc.data()
-        setClients(clients)
-      })
+        snapshot.docs.forEach((doc) => {
+          clients[doc.id] = doc.data()
+          setClients(clients)
+        })  
+      }
     })
     onSnapshot(colRef2, (snapshot) => {
       setWarehouses([])
+      if (isMounted) {
       let warehouse = {};
-      snapshot.docs.forEach((doc) => {
-        warehouse[doc.id] = doc.data()
-        setWarehouses(warehouse)
-      })
+        snapshot.docs.forEach((doc) => {
+          warehouse[doc.id] = doc.data()
+          setWarehouses(warehouse)
+        })
+      }
     })
+    return () => {
+      isMounted = false;
+    };
   }, [])
   
   const columns = [

@@ -24,18 +24,25 @@ export function Flow() {
     const q1 = query(colRef1, where("direction", "==", "outgoing"));
     const q2 = query(colRef1, where("direction", "==", "incoming"));
 
-    
+    let isMounted = true;
     onSnapshot(q1, (snapshot) => {
       setOutgoing([])
+      if (isMounted) {
         snapshot.docs.forEach((doc) => {
           setOutgoing((prev) => [ doc.data() , ...prev])
         })
+      }
     })
     onSnapshot(q2, (snapshot) => {
       setIncoming([])
+      if (isMounted) {
         snapshot.docs.forEach((doc) => {
           setIncoming((prev) => [ doc.data() , ...prev])
         })
+      }
+      return () => {
+        isMounted = false;
+      };
     })  
 
   }, [])

@@ -16,22 +16,30 @@ export function Messages() {
   useEffect(() => {
     const colRef1 = collection(db, "clients" )
     const colRef = collection(db, "messages" )
+    let isMounted = true;
     //real time update
     onSnapshot(colRef, (snapshot) => {
         setData([])
-        snapshot.docs.forEach((doc) => {
-          setData((prev) => [ doc.data() , ...prev])
-        })
+        if (isMounted) {
+          snapshot.docs.forEach((doc) => {
+            setData((prev) => [ doc.data() , ...prev])
+          })
+        }
     })
     onSnapshot(colRef1, (snapshot) => {
         setClients([])
-        let clients = {};
-        snapshot.docs.forEach((doc) => {
-          clients[doc.id] = doc.data()
-          setClients(clients)
-        })
+        if (isMounted) {
+          let clients = {};
+          snapshot.docs.forEach((doc) => {
+            clients[doc.id] = doc.data()
+            setClients(clients)
+          })
+        }
       })
-    console.log(data)
+      
+    return () => {
+      isMounted = false;
+    }; 
   }, [])
 
   const columns = [

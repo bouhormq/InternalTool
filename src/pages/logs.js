@@ -19,19 +19,26 @@ export function Logs() {
     const q = query(colRef,where("fulfillment_status", "in", ["success","cancelled","failure"]));
     const oldq = query(colRef1, where("fulfillment_status", "in", ["success","cancelled","failure"]));
 
-    
+    let isMounted = true;
     onSnapshot(q, (snapshot) => {
         setData([])
-        snapshot.docs.forEach((doc) => {
-          setData((prev) => [ doc.data() , ...prev])
-        })
+        if (isMounted) {
+          snapshot.docs.forEach((doc) => {
+            setData((prev) => [ doc.data() , ...prev])
+          })
+        }
     })
     onSnapshot(oldq, (snapshot) => {
       setoldData([])
-      snapshot.docs.forEach((doc) => {
-        setoldData((prev) => [ doc.data() , ...prev])
-      })
-    })    
+      if (isMounted) {
+        snapshot.docs.forEach((doc) => {
+          setoldData((prev) => [ doc.data() , ...prev])
+        })
+      }
+    })  
+    return () => {
+      isMounted = false;
+    };   
   }, [])
 
   const columns = [

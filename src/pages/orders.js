@@ -17,13 +17,18 @@ export function Orders() {
     const colRef = collection(db, "orders" )
     const q = query(colRef, where("fulfillment_status", "in", ["open","in_progress"]));
 
-    
+    let isMounted = true;
     onSnapshot(q, (snapshot) => {
         setData([])
-        snapshot.docs.forEach((doc) => {
-          setData((prev) => [ doc.data() , ...prev])
-        })
-    })   
+        if (isMounted) {
+          snapshot.docs.forEach((doc) => {
+            setData((prev) => [ doc.data() , ...prev])
+          })
+        }
+    })  
+    return () => {
+      isMounted = false;
+    }; 
   }, [])
 
   const columns = [

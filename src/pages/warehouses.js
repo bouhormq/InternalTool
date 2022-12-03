@@ -17,18 +17,26 @@ export function Warehouses() {
   useEffect(() => {
     const colRef1 = collection(db, "inventory" )
     const colRef2 = collection(db, "warehouses" )
+    let isMounted = true;
     onSnapshot(colRef2, (snapshot) => {
       setData([])
-      snapshot.docs.forEach((doc) => {
-        setData((prev) => [ doc.data() , ...prev])
-      })
+      if (isMounted) {
+        snapshot.docs.forEach((doc) => {
+          setData((prev) => [ doc.data() , ...prev])
+        })
+      }
     })
     onSnapshot(colRef1, (snapshot) => {
       setInvetory([])
-      snapshot.docs.forEach((doc) => {
-        setInvetory((prev) => [...prev, doc.data()])
-      })
-  })
+      if (isMounted) {
+        snapshot.docs.forEach((doc) => {
+          setInvetory((prev) => [...prev, doc.data()])
+        })  
+      }
+    })
+    return () => {
+      isMounted = false;
+    };
   }, [])
 
   const PostalCodes = ({ values }) => {

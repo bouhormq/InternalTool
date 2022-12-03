@@ -22,31 +22,39 @@ export function Inventory() {
       const colRef2 = collection(db, "warehouses" )
       const colRef1 = collection(db, "clients" )
       //real time update
-  
+      let isMounted = true;
       onSnapshot(colRef, (snapshot) => {
         setData([])
-        snapshot.docs.forEach((doc) => {
-          setData((prev) => [...prev, doc.data()])
-        })
+        if (isMounted) {
+          snapshot.docs.forEach((doc) => {
+            setData((prev) => [...prev, doc.data()])
+          })
+        }
     })
     
     onSnapshot(colRef1, (snapshot) => {
       setClients([])
-      let clients = {};
-      snapshot.docs.forEach((doc) => {
-        clients[doc.id] = doc.data()
-        setClients(clients)
-      })
+      if (isMounted) {
+        let clients = {};
+        snapshot.docs.forEach((doc) => {
+          clients[doc.id] = doc.data()
+          setClients(clients)
+        })
+      }
     })
     onSnapshot(colRef2, (snapshot) => {
       setWarehouses([])
-      let warehouse = {};
-      snapshot.docs.forEach((doc) => {
-        warehouse[doc.id] = doc.data()
-        setWarehouses(warehouse)
-      })
+      if (isMounted) {
+        let warehouse = {};
+        snapshot.docs.forEach((doc) => {
+          warehouse[doc.id] = doc.data()
+          setWarehouses(warehouse)
+        })
+      }
     })
-
+    return () => {
+      isMounted = false;
+    };  
       }, [])
 
       const handleVisibility = visibility => {

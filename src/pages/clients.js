@@ -16,13 +16,18 @@ export function Clients() {
   useEffect(() => {
     const colRef = collection(db, "clients" )
     //real time update
+    let isMounted = true;
     onSnapshot(colRef, (snapshot) => {
         setData([])
-        snapshot.docs.forEach((doc) => {
-          setData((prev) => [ doc.data() , ...prev])
-        })
+        if (isMounted) {
+          snapshot.docs.forEach((doc) => {
+            setData((prev) => [ doc.data() , ...prev])
+          })
+        }
     })
-    console.log(data)
+    return () => {
+      isMounted = false;
+    };
   }, [])
 
   const columns = [
