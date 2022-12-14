@@ -80,11 +80,11 @@ export function Returns() {
       accessor: "client",
       id: "client",
     },
-    {
+    /*{
       Header: "Return Number (Global)",
       accessor: "intReturnNumber",
       id: "intReturnNumber",
-    },
+    },*/
     {
       Header: "Return Number (Client)",
       accessor: "return_number",
