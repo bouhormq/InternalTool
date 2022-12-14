@@ -79,11 +79,11 @@ export function Inventory() {
           accessor: "sku",
           id: "sku",
         },
-        {
+        /*{
           Header: "SKU (Internal)",
           accessor: "skuInt",
           id: "skuInt",
-        },
+        },*/
         {
           Header: "Title",
           accessor: "title",
