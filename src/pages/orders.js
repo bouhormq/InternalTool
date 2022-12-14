@@ -49,11 +49,11 @@ export function Orders() {
       accessor: "client",
       id: "client",
     },
-    {
+    /*{
       Header: "Order Number (Global)",
       accessor: "intOrderNumber",
       id: "intOrderNumber",
-    },
+    },*/
     {
       Header: "Order Number (Client)",
       accessor: "order_number",
