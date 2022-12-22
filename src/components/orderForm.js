@@ -18,7 +18,7 @@ export function OrderForm({visible,handleVisibility}) {
   const [visibleTimeField, setVisibleTimeField] = useState(true);
   const [visibleContractLength, setVisibleContractLength] = useState(true);
   const [inputFieldsGlobal, setInputFieldsGlobal] = useState([
-    { "daysOfWeek": [ ], 
+    { daysOfWeek: [ ], 
     contractLength:'3 Months',
     total_weight:'',
     contactEmail:'',
@@ -202,7 +202,7 @@ export function OrderForm({visible,handleVisibility}) {
     let selectedsku = Object.keys(products)[0]
     setInputFields([{ id: uuidv4(), quantity: '', sku: selectedsku, skuInt: `${selectedClient}-${selectedsku}`, description: ''},])
     setInputFieldsGlobal([
-      { "daysOfWeek": [ ], 
+      { daysOfWeek: [ ], 
       contractLength:'3 Months',
       total_weight:'',
       total_price:'',
