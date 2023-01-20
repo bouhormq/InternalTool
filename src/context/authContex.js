@@ -29,7 +29,6 @@ export const AuthContextProvider = ({ children }) => {
 
 
   const googleSignIn = async () => {
-    try {
       console.log("MAMA")
       const googleAuth = gapi.auth2.getAuthInstance()
       console.log(googleAuth)
@@ -40,13 +39,6 @@ export const AuthContextProvider = ({ children }) => {
       console.log(credential)
       const response = await signInWithCredential(auth, credential)
       console.log(response)
-      
-     
-      // store user
-    } catch (error) {
-      // clean user from store
-      console.error('signInPopup (firebase/auth.js)', error)
-    }
   }
   
   const logOut = async () => {
