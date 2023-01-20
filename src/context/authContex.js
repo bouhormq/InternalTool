@@ -34,11 +34,9 @@ export const AuthContextProvider = ({ children }) => {
       const googleUser = await googleAuth.signIn()
   
       const token = googleUser.getAuthResponse().id_token
-      const credential = GoogleAuthProvider.credential(token).then(async (value) => {
-        await signInWithCredential(auth, credential)
-        // Expected output: "Success!"
-      });
+      const credential = GoogleAuthProvider.credential(token)
   
+      const response = await signInWithCredential(auth, credential)
       
       
      
