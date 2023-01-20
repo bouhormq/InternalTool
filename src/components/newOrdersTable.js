@@ -12,7 +12,7 @@ import {GlobalFilter, Fulfil} from './tableCells'
 
 
 
-function NewOrdersTable({ columns, data }) {
+function NewDeliveriesTable({ columns, data }) {
 
   // Use the state and functions returned from useTable to build your UI
   const {
@@ -116,7 +116,7 @@ function NewOrdersTable({ columns, data }) {
                               className="px-6 py-4 whitespace-nowrap"
                               role="cell"
                               onClick={() => {
-                                if(cell.column.Header === "Action" && row.original.fulfillment_status === "open" ){
+                                if(cell.column.Header === "Action" && row.original.fulfillmentStatus === "open" ){
                                   Fulfil(row.original)
                                 }
                               }}
@@ -205,5 +205,5 @@ function NewOrdersTable({ columns, data }) {
   )
 }
 
-export default NewOrdersTable;
+export default NewDeliveriesTable;
 

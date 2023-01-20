@@ -88,7 +88,7 @@ export const ExportToExcel = ({client}) => {
                 "SKU int.":	doc.data().skuInt,
                 "Article description": doc.data().title,	
                 "Measurements (H x W x L)":	doc.data().dimensions,
-                "ON STOCK	":doc.data().inventory_total_stock,
+                "ON STOCK	":doc.data().inventoryTotalStock,
                 "IN": "",
                 "OUT":""
               })
@@ -99,10 +99,10 @@ export const ExportToExcel = ({client}) => {
           const querySnapshot3 = await getDocs(q3);
           querySnapshot3.forEach((doc) => {
             //look for items 
-            let date = new Date(doc.data().delivery_at)
-            for(var i = 0; i < doc.data().line_items.length; ++i){
-              let skuInt = doc.data().line_items[i]["skuInt"]
-              let quantity = doc.data().line_items[i]["quantity"]
+            let date = new Date(doc.data().deliveryAt)
+            for(var i = 0; i < doc.data().lineItems.length; ++i){
+              let skuInt = doc.data().lineItems[i]["skuInt"]
+              let quantity = doc.data().lineItems[i]["quantity"]
               const searchIndex = flowIn.findIndex((skuFlow) => skuFlow["SKU int."] === skuInt);
               flowIn[searchIndex][formatDate(date)] = quantity
             }
@@ -112,9 +112,9 @@ export const ExportToExcel = ({client}) => {
           querySnapshot4.forEach((doc) => {
             //look for items 
             let date = new Date(doc.data().return_at)
-            for(var i = 0; i < doc.data().line_items.length; ++i){
-              let skuInt = doc.data().line_items[i]["skuInt"]
-              let quantity = doc.data().line_items[i]["quantity"]
+            for(var i = 0; i < doc.data().lineItems.length; ++i){
+              let skuInt = doc.data().lineItems[i]["skuInt"]
+              let quantity = doc.data().lineItems[i]["quantity"]
               const searchIndex = flowOut.findIndex((skuFlow) => skuFlow["SKU int."] === skuInt);
               flowOut[searchIndex][formatDate(date)] = quantity
             }
@@ -123,30 +123,30 @@ export const ExportToExcel = ({client}) => {
           const querySnapshot1 = await getDocs(q1);
           let orders=[]
           querySnapshot1.forEach((doc) => {
-            if(getDateOfISOWeek(w,y) <= new Date(doc.data().delivery_at) && addWeeks(1,getDateOfISOWeek(w,y)) >= new Date(doc.data().delivery_at)){
+            if(getDateOfISOWeek(w,y) <= new Date(doc.data().deliveryAt) && addWeeks(1,getDateOfISOWeek(w,y)) >= new Date(doc.data().deliveryAt)){
               orders.push({
                 "Order No.":doc.data().order_number,
                 "Client":	client,
-                "Wunschtermin": doc.data().delivery_at,	
-                "Qty.":	doc.data().line_items[0].quantity,
-                "SKU int.":doc.data().line_items[0].skuInt,
-                "Description": doc.data().line_items[0].description,
+                "Wunschtermin": doc.data().deliveryAt,	
+                "Qty.":	doc.data().lineItems[0].quantity,
+                "SKU int.":doc.data().lineItems[0].skuInt,
+                "Description": doc.data().lineItems[0].description,
                 "Recipient":doc.data().recipient,
-                "Delivery Adress":doc.data().shipping_address.address + " " + doc.data().shipping_address.address2 + ", " + doc.data().shipping_address.zip + ", " + doc.data().shipping_address.city + ", " + doc.data().shipping_address.country,
+                "Delivery Adress":doc.data().shippingAddress.address + " " + doc.data().shippingAddress.address2 + ", " + doc.data().shippingAddress.zip + ", " + doc.data().shippingAddress.city + ", " + doc.data().shippingAddress.country,
                 "TOS":doc.data().tos,
-                "Fulfillment Status":doc.data().fulfillment_status,
+                "Fulfillment Status":doc.data().fulfillmentStatus,
                 "Late":"False",
-                "Comments": doc.data().cancel_reason
+                "Comments": doc.data().cancelReason
               })
-              if(doc.data().line_items.length > 1){
-                for(let i = 1; i< doc.data().line_items.length; ++i){
+              if(doc.data().lineItems.length > 1){
+                for(let i = 1; i< doc.data().lineItems.length; ++i){
                   orders.push({
                     "Order No.":"",
                     "Client":	"",
                     "Wunschtermin": "",	
-                    "Qty.":	doc.data().line_items[i].quantity,
-                    "SKU int.":doc.data().line_items[i].skuInt,
-                    "Description": doc.data().line_items[i].description,
+                    "Qty.":	doc.data().lineItems[i].quantity,
+                    "SKU int.":doc.data().lineItems[i].skuInt,
+                    "Description": doc.data().lineItems[i].description,
                     "Recipient":"",
                     "Delivery Adress":"",
                     "TOS":"",
@@ -161,30 +161,30 @@ export const ExportToExcel = ({client}) => {
           const querySnapshot2 = await getDocs(q2);
           let returns=[]
           querySnapshot2.forEach((doc) => {
-            if(getDateOfISOWeek(w,y) <= new Date(doc.data().delivery_at) && addWeeks(1,getDateOfISOWeek(w,y)) >= new Date(doc.data().delivery_at)){
+            if(getDateOfISOWeek(w,y) <= new Date(doc.data().deliveryAt) && addWeeks(1,getDateOfISOWeek(w,y)) >= new Date(doc.data().deliveryAt)){
             returns.push({
               "Order No.":doc.data().return_number,
               "Client":	client,
               "Wunschtermin": doc.data().return_at,	
-              "Qty.":	doc.data().line_items[0].quantity,
-              "SKU int.":doc.data().line_items[0].skuInt,
-              "Description": doc.data().line_items[0].description,
+              "Qty.":	doc.data().lineItems[0].quantity,
+              "SKU int.":doc.data().lineItems[0].skuInt,
+              "Description": doc.data().lineItems[0].description,
               "Returner":doc.data().recipient,
-              "Return Adress":doc.data().shipping_address.address + " " + doc.data().shipping_address.address2 + ", " + doc.data().shipping_address.zip + ", " + doc.data().shipping_address.city + ", " + doc.data().shipping_address.country,
+              "Return Adress":doc.data().shippingAddress.address + " " + doc.data().shippingAddress.address2 + ", " + doc.data().shippingAddress.zip + ", " + doc.data().shippingAddress.city + ", " + doc.data().shippingAddress.country,
               "TOS":doc.data().tos,
-              "Fulfillment Status":doc.data().fulfillment_status,
+              "Fulfillment Status":doc.data().fulfillmentStatus,
               "Late":"False",
-              "Comments": doc.data().cancel_reason
+              "Comments": doc.data().cancelReason
             })
-            if(doc.data().line_items.length > 1){
-              for(let i = 1; i< doc.data().line_items.length; ++i){
+            if(doc.data().lineItems.length > 1){
+              for(let i = 1; i< doc.data().lineItems.length; ++i){
                 returns.push({
                   "Order No.":"",
                   "Client":	"",
                   "Wunschtermin": "",	
-                  "Qty.":	doc.data().line_items[i].quantity,
-                  "SKU int.":doc.data().line_items[i].skuInt,
-                  "Description": doc.data().line_items[i].description,
+                  "Qty.":	doc.data().lineItems[i].quantity,
+                  "SKU int.":doc.data().lineItems[i].skuInt,
+                  "Description": doc.data().lineItems[i].description,
                   "Recipient":"",
                   "Delivery Adress":"",
                   "TOS":"",

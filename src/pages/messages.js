@@ -2,20 +2,22 @@ import db from '../firebase';
 import { collection, onSnapshot} from 'firebase/firestore';
 import { useEffect, useState } from 'react';
 import Table from '../components/table';
-import MessageForm from '../components/messageForm';
+import MessageForm from '../components/forms/messageForm';
 import React from 'react';
-import { DateDeliveryField,StateDeliveryField,ContentDeliveryField } from '../components/tableCells';
+import { DateDeliveryField,StateDeliveryField,ContentDeliveryField, DateField, DailyReminderStatus} from '../components/tableCells';
 
 
 
 export function Messages() {
   const [data, setData] = useState([]);
+  const [dailyReminders, setDailyReminders] = useState([]);
   const [visible, setVisible] = useState(false);
   const [clients, setClients] = useState({"WISAG":{}});
   
   useEffect(() => {
     const colRef1 = collection(db, "clients" )
     const colRef = collection(db, "messages" )
+    const colRef2 = collection(db, "dailyReminders" )
     let isMounted = true;
     //real time update
     onSnapshot(colRef, (snapshot) => {
@@ -26,6 +28,14 @@ export function Messages() {
           })
         }
     })
+    onSnapshot(colRef2, (snapshot) => {
+      setDailyReminders([])
+      if (isMounted) {
+        snapshot.docs.forEach((doc) => {
+          setDailyReminders((prev) => [ doc.data() , ...prev])
+        })
+      }
+  })
     onSnapshot(colRef1, (snapshot) => {
         setClients([])
         if (isMounted) {
@@ -42,11 +52,25 @@ export function Messages() {
     }; 
   }, [])
 
+  function compareTimeStamp(rowA, rowB, id, desc) {
+    let a = rowA.values[id].toDate().toLocaleString("sv", { timeZone: "Europe/Berlin"});
+    let b = rowB.values[id].toDate().toLocaleString("sv", { timeZone: "Europe/Berlin"});
+    if (!a || a.length < 0) {  // Blanks and non-numeric strings to bottom
+        a = desc ? Number.NEGATIVE_INFINITY : Number.POSITIVE_INFINITY;
+    }
+    if (!b || b.length < 0) {  // Blanks and non-numeric strings to bottom
+      b = desc ? Number.NEGATIVE_INFINITY : Number.POSITIVE_INFINITY;
+  }
+    if (a > b) return 1; 
+    if (a < b) return -1;
+    return 0;
+}
+
   const columns = [
     {
         Header: "Client",
         id: "client",
-        accessor: "client",
+        accessor: "client.name",
     },
     {
       Header: "To",
@@ -55,21 +79,58 @@ export function Messages() {
     },
     {
       Header: "Content",
-      accessor: "content",
+      accessor: "content.text",
       id: "content",
       Cell: ContentDeliveryField
     },
     {
         Header: "Delivery Date",
-        accessor: "delivery",
+        accessor: "delivery.endTime",
         id: "delivery_date",
-        Cell: DateDeliveryField
-      },
+        Cell: DateDeliveryField,
+        sortType: compareTimeStamp
+        
+    },
     {
         Header: "Delivery State",
-        accessor: "delivery",
+        accessor: "delivery.state",
         id: "delivery_state",
         Cell: StateDeliveryField
+    }
+  ]
+
+  const columns1 = [
+    {
+      Header: "Status",
+      id: "status",
+      accessor: "createdAt",
+      Cell: DailyReminderStatus, // new
+    },
+    {
+      Header: "Sent At",
+      accessor: "createdAt",
+      id: "createdAt",
+      Cell: DateField
+    },
+    {
+      Header: "Client",
+      id: "client",
+      accessor: "client.name",
+    },
+    {
+      Header: "Contact",
+      accessor: "contact.name",
+      id: "contact.name",
+    },{
+      Header: "Contact Number",
+      accessor: "contact.number",
+      id: "contact.number",
+    },
+    {
+      Header: "Content",
+      accessor: "content",
+      id: "content",
+      Cell: ContentDeliveryField
     }
   ]
 
@@ -90,7 +151,13 @@ export function Messages() {
     <div class="container mx-auto">
       <div className="mt-5">
         <div className="mb-6">
-            <span  class="relative top-1.5 ml-3 inline-block align-baseline text-5xl font-bold text-gray-700">Messages 📬</span>
+            <span  class="-z-10relative top-1.5 ml-3 inline-block align-baseline text-5xl font-bold text-gray-700">Daily Reminders 📅</span>
+          </div>      
+        <Table columns={columns1} data={dailyReminders}/>
+      </div>
+      <div className="mt-5">
+        <div className="mb-6">
+            <span  class="-1-10 relative top-1.5 ml-3 inline-block align-baseline text-5xl font-bold text-gray-700">Messages 📬</span>
           </div>      
         <Table columns={columns} data={data} button={<AddButton/>}/>
       </div>

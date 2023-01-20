@@ -2,20 +2,59 @@ import Table from '../components/table';
 import db from '../firebase';
 import { collection, onSnapshot, query, orderBy,where } from 'firebase/firestore';
 import { useEffect, useState } from 'react';
-import { DateField, StatusPill, ShippingField, ItemsField, StatusPillAction } from '../components/tableCells';
-import { OrderForm } from '../components/orderForm';
-import plus from "../media/plus-white.png"
+import { DateField, StatusPill, ShippingField, ItemsField, StatusPillAction, PostalCodes } from '../components/tableCells';
+import { DeliveryForm } from '../components/forms/deliveryForm';
 import React from 'react';
-
-
+import { UserAuth } from '../context/authContex';
 export function Orders() {
   const [data, setData] = useState([]);
   const [visible, setVisible] = useState(false);
+  const {gapi} = UserAuth();
+
+
+  var event = {
+    summary: "Hello World",
+    location: "",
+    start: {
+      dateTime: "2023-01-18T09:00:00-07:00",
+      timeZone: "Europe/Berlin",
+    },
+    end: {
+      dateTime: "2023-01-18T17:00:00-07:00",
+      timeZone: "Europe/Berlin",
+    },
+    recurrence: ["RRULE:FREQ=DAILY;COUNT=2"],
+    attendees: [],
+    reminders: {
+      useDefault: false,
+      overrides: [
+        { method: "email", minutes: 24 * 60 },
+        { method: "popup", minutes: 10 },
+      ],
+    },
+  };
+  const publishTheCalenderEvent = (event) => {
+    try {
+        gapi.client.load('calendar', 'v3', () => {
+            var request = gapi.client.calendar.events.insert({
+                'calendarId': 'primary',
+                'resource': event
+            });
+        
+            request.execute(function(event) {
+                console.log('Event created: ' + event.htmlLink);
+            });
+        })
+          
+    } catch (error) {
+        console.log(error)
+    }
+  }
 
   
   useEffect(() => {
     const colRef = collection(db, "orders" )
-    const q = query(colRef, where("fulfillment_status", "in", ["open","in_progress"]));
+    const q = query(colRef, where("fulfillmentStatus", "in", ["open","inProgress"]));
 
     let isMounted = true;
     onSnapshot(q, (snapshot) => {
@@ -31,62 +70,95 @@ export function Orders() {
     }; 
   }, [])
 
+  
+
   const columns = [
     {
       Header: "Action",
-      accessor: "fulfillment_status",
+      accessor: "fulfillmentStatus",
       id: "action",
       Cell: StatusPillAction, // new
     },
     {
+      Header: "ID",
+      accessor: "id",
+      id: "id",
+    },
+    {
       Header: "Fulfillment Status",
-      accessor: "fulfillment_status",
-      id: "fulfillment_status",
+      accessor: "fulfillmentStatus",
+      id: "fulfillmentStatus",
       Cell: StatusPill, // new
+    },{
+      Header: "Delivery At",
+      accessor: "deliveryAt",
+      id: "deliveryAt",
+      Cell: DateField, // new
+    },
+    {
+      Header: "Availabe Warehouses",
+      accessor: "availableWarehouses",
+      id: "availableWarehouses",
+      Cell: ({ cell: { value } }) => <PostalCodes values={value} />
+    },
+    {
+      Header: "Assigned Warehouse",
+      accessor: "assignedWarehouse",
+      id: "assignedWarehouse",
     },
     {
       Header: "Client",
-      accessor: "client",
+      accessor: "client.name",
       id: "client",
-    },
-    /*{
-      Header: "Order Number (Global)",
-      accessor: "intOrderNumber",
-      id: "intOrderNumber",
-    },*/
-    {
-      Header: "Order Number (Client)",
-      accessor: "order_number",
-      id: "order_number",
-    },
-    {
-      Header: "Delivery At",
-      accessor: "delivery_at",
-      id: "delivery_at",
-      Cell: DateField, // new
-    },
-    {
-      Header: "Created At",
-      accessor: "created_at",
-      id: "created_at",
-      Cell: DateField, // new
+    },{
+      Header: "Contact",
+      accessor: "contact.name",
+      id: "contact",
+    },{
+      Header: "Rider",
+      accessor: "rider.name",
+      id: "rider",
+    },{
+      Header: "Recipient",
+      accessor: "recipient.name",
+      id: "recipient",
+    },{
+      Header: "Line Items",
+      accessor: "lineItems",
+      id: "lineItems",
+      Cell: ItemsField, // new
     },
     {
       Header: "Shipping Address",
-      accessor: "shipping_address",
-      id: "shipping_address",
+      accessor: "shippingAddress",
+      id: "shippingAddress",
       Cell: ShippingField, // new
-    },
-    {
-      Header: "Items",
-      accessor: "line_items",
-      id: "line_items",
-      Cell: ItemsField, // new
+    },{
+      Header: "Created At",
+      accessor: "createdAt",
+      id: "createdAt",
+      Cell: DateField, // new
+    },{
+      Header: "Updated At",
+      accessor: "updatedAt",
+      id: "updatedAt",
+      Cell: DateField, // new
+    },{
+      Header: "Recipient Comments",
+      accessor: "recipientComments",
+      id: "recipientComments",
+    },{
+      Header: "Invoice Stamp",
+      accessor: "invoiceStamp",
+      id: "invoiceStamp",
+      Cell: DateField, // new
     },
   ]
+
   const handleVisibility = visibility => {
     // 👇️ take parameter passed from Child component
     setVisible(visibility);
+    publishTheCalenderEvent(event)
   };
   const AddButton = () => {
     return(
@@ -100,11 +172,11 @@ export function Orders() {
     <div class="container mx-auto">
         <div className="mt-5">
         <div className="mb-6">
-              <span class="relative top-1.5 ml-3 inline-block align-baseline text-5xl font-bold text-gray-700">Deliveries 🚴‍♂️ 🔜</span>
+              <span class="relative top-1.5 ml-3 inline-block align-baseline text-5xl font-bold text-gray-700">Orders 🚴‍♂️ 🔜</span>
             </div>
             <Table  columns={columns} data={data}  button={<AddButton/>}/>
         </div>
-        <OrderForm handleVisibility={handleVisibility} visible={visible}/>
+        <DeliveryForm handleVisibility={handleVisibility} visible={visible} type={"Order"}/>
     </div>
   );
 }

@@ -2,32 +2,20 @@ import Table from '../components/table';
 import db from '../firebase';
 import { collection, onSnapshot, query, orderBy,where } from 'firebase/firestore';
 import { useEffect, useState } from 'react';
-import { DateField, StatusPill, ShippingField, ItemsField, StatusPillAction } from '../components/tableCells';
-import { ReturnForm } from '../components/returnForm';
-import plus from "../media/plus-white.png"
+import { DateField, StatusPill, ShippingField, ItemsField, StatusPillAction, PostalCodes } from '../components/tableCells';
+import { DeliveryForm } from '../components/forms/deliveryForm';
 import React from 'react';
-
-
 
 
 export function Returns() {
   const [data, setData] = useState([]);
   const [visible, setVisible] = useState(false);
-  const [clients, setClients] = useState({});
-  const [warehouses, setWarehouses] = useState(
-    {"DE-FFM-NWES": {address: "Finkenhofstraße 12, 60322 Frankfurt am Main, Germany", city: "Frankfurt am Main", country: "Germany",country_code: "DE", delivers_to: ['60306', '60308', '60310', '60311', '60312', '60313', '60314', '60315', '60316', '60318', '60320', '60322', '60323', '60325', '60329', '60385', '60487', '60594', '60596'], postal_code: "60322", province: "Hesse"}},
-  );
 
-  const handleVisibility = visibility => {
-    // 👇️ take parameter passed from Child component
-    setVisible(visibility);
-  };
-
+  
   useEffect(() => {
     const colRef = collection(db, "returns" )
-    const colRef1 = collection(db, "clients" )
-    const colRef2 = collection(db, "warehouses" )
-    const q = query(colRef,where("fulfillment_status", "in", ["open","in_progress"]));
+    const q = query(colRef, where("fulfillmentStatus", "in", ["open","inProgress"]));
+
     let isMounted = true;
     onSnapshot(q, (snapshot) => {
         setData([])
@@ -36,91 +24,96 @@ export function Returns() {
             setData((prev) => [ doc.data() , ...prev])
           })
         }
-    })   
-    onSnapshot(colRef1, (snapshot) => {
-      setClients([])
-      if (isMounted) {
-      let clients = {};
-        snapshot.docs.forEach((doc) => {
-          clients[doc.id] = doc.data()
-          setClients(clients)
-        })  
-      }
-    })
-    onSnapshot(colRef2, (snapshot) => {
-      setWarehouses([])
-      if (isMounted) {
-      let warehouse = {};
-        snapshot.docs.forEach((doc) => {
-          warehouse[doc.id] = doc.data()
-          setWarehouses(warehouse)
-        })
-      }
-    })
+    })  
     return () => {
       isMounted = false;
-    };
+    }; 
   }, [])
+
   
+
   const columns = [
     {
       Header: "Action",
-      accessor: "fulfillment_status",
+      accessor: "fulfillmentStatus",
       id: "action",
       Cell: StatusPillAction, // new
+    },{
+      Header: "ID",
+      accessor: "id",
+      id: "id",
     },
     {
       Header: "Fulfillment Status",
-      accessor: "fulfillment_status",
-      id: "fulfillment_status",
+      accessor: "fulfillmentStatus",
+      id: "fulfillmentStatus",
       Cell: StatusPill, // new
+    },{
+      Header: "Delivery At",
+      accessor: "deliveryAt",
+      id: "deliveryAt",
+      Cell: DateField, // new
+    },
+    {
+      Header: "Availabe Warehouses",
+      accessor: "availableWarehouses",
+      id: "availableWarehouses",
+      Cell: ({ cell: { value } }) => <PostalCodes values={value} />
+    },
+    {
+      Header: "Assigned Warehouse",
+      accessor: "assignedWarehouse",
+      id: "assignedWarehouse",
     },
     {
       Header: "Client",
-      accessor: "client",
+      accessor: "client.name",
       id: "client",
-    },
-    /*{
-      Header: "Return Number (Global)",
-      accessor: "intReturnNumber",
-      id: "intReturnNumber",
-    },*/
-    {
-      Header: "Return Number (Client)",
-      accessor: "return_number",
-      id: "return_number",
-    },
-    {
-      Header: "Order Number",
-      accessor: "order_number",
-      id: "order_number",
-    },
-    {
-      Header: "Delivery At",
-      accessor: "return_at",
-      id: "return_at",
-      Cell: DateField, 
-    },
-    {
-      Header: "Created At",
-      accessor: "created_at",
-      id: "created_at",
-      Cell: DateField, 
+    },{
+      Header: "Contact",
+      accessor: "contact.name",
+      id: "contact",
+    },{
+      Header: "Rider",
+      accessor: "rider.name",
+      id: "rider",
+    },{
+      Header: "Recipient",
+      accessor: "recipient.name",
+      id: "recipient",
+    },{
+      Header: "Line Items",
+      accessor: "lineItems",
+      id: "lineItems",
+      Cell: ItemsField, // new
     },
     {
       Header: "Shipping Address",
-      accessor: "shipping_address",
-      id: "shipping_address",
+      accessor: "shippingAddress",
+      id: "shippingAddress",
       Cell: ShippingField, // new
-    },
-    {
-      Header: "Items",
-      accessor: "line_items",
-      id: "line_items",
-      Cell: ItemsField, // new
-    },
+    },{
+      Header: "Created At",
+      accessor: "createdAt",
+      id: "createdAt",
+      Cell: DateField, // new
+    },{
+      Header: "Updated At",
+      accessor: "updatedAt",
+      id: "updatedAt",
+      Cell: DateField, // new
+    },{
+      Header: "Invoice Stamp",
+      accessor: "invoiceStamp",
+      id: "invoiceStamp",
+      Cell: DateField, // new
+    }
   ]
 
+  const handleVisibility = visibility => {
+    // 👇️ take parameter passed from Child component
+    setVisible(visibility);
+  };
   const AddButton = () => {
     return(
      <button onClick={() => handleVisibility(true)} type="button" class="text-white bg-blue-700 hover:bg-blue-800 focus:outline-none focus:ring-4 focus:ring-blue-300 font-medium rounded-full text-sm px-4 py-2  text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
@@ -128,17 +121,16 @@ export function Returns() {
      </button>
     )
    }
-
   
   return (
     <div class="container mx-auto">
         <div className="mt-5">
-            <div className="mb-6">
+        <div className="mb-6">
               <span class="relative top-1.5 ml-3 inline-block align-baseline text-5xl font-bold text-gray-700">Returns 🚴‍♂️ 🔙</span>
             </div>
-          <Table  class="mt-10" columns={columns} data={data} button={<AddButton/>} />
+            <Table  columns={columns} data={data}  button={<AddButton/>}/>
         </div>
-        <ReturnForm handleVisibility={handleVisibility} visible={visible}  warehouses={warehouses} clients={clients}/>
+        <DeliveryForm handleVisibility={handleVisibility} visible={visible} type={"Return"}/>
     </div>
   );
 }

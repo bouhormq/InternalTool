@@ -110,7 +110,7 @@ function NewReturnsTable({ columns, data }) {
                               className="px-6 py-4 whitespace-nowrap"
                               role="cell"
                               onClick={() => {
-                                if(cell.column.Header === "Action" && row.original.fulfillment_status === "open" ){
+                                if(cell.column.Header === "Action" && row.original.fulfillmentStatus === "open" ){
                                   Fulfil(row.original)
                                 }
                               }}

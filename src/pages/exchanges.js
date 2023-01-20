@@ -2,23 +2,19 @@ import Table from '../components/table';
 import db from '../firebase';
 import { collection, onSnapshot, query, orderBy,where } from 'firebase/firestore';
 import { useEffect, useState } from 'react';
-import { DateField, StatusPill, ShippingField, ItemsField, StatusPillAction } from '../components/tableCells';
+import { DateField, StatusPill, ShippingField, ItemsField, StatusPillAction, PostalCodes } from '../components/tableCells';
 import { DeliveryForm } from '../components/forms/deliveryForm';
-import plus from "../media/plus-white.png"
 import React from 'react';
-import { PostalCodes } from '../components/tableCells';
 
-//var distance = require("hpsweb-google-distance");
 
-export function Logs() {
+export function Exchanges() {
   const [data, setData] = useState([]);
-  const [oldData, setoldData] = useState([]);
+  const [visible, setVisible] = useState(false);
+
   
   useEffect(() => {
-    const colRef = collection(db, "orders" )
-    const colRef1 = collection(db, "returns" )
-    const q = query(colRef,where("fulfillmentStatus", "in", ["success","cancelled","failure"]));
-    const oldq = query(colRef1, where("fulfillmentStatus", "in", ["success","cancelled","failure"]));
+    const colRef = collection(db, "exchanges" )
+    const q = query(colRef);
 
     let isMounted = true;
     onSnapshot(q, (snapshot) => {
@@ -28,28 +24,16 @@ export function Logs() {
             setData((prev) => [ doc.data() , ...prev])
           })
         }
-    })
-    onSnapshot(oldq, (snapshot) => {
-      setoldData([])
-      if (isMounted) {
-        snapshot.docs.forEach((doc) => {
-          setoldData((prev) => [ doc.data() , ...prev])
-        })
-      }
     })  
     return () => {
       isMounted = false;
-    };   
+    }; 
   }, [])
 
   
+
   const columns = [
     {
-      Header: "Action",
-      accessor: "fulfillmentStatus",
-      id: "action",
-      Cell: StatusPillAction, // new
-    },{
       Header: "ID",
       accessor: "id",
       id: "id",
@@ -85,6 +69,10 @@ export function Logs() {
       accessor: "contact.name",
       id: "contact",
     },{
+      Header: "Rider",
+      accessor: "rider.name",
+      id: "rider",
+    },{
       Header: "Recipient",
       accessor: "recipient.name",
       id: "recipient",
@@ -100,36 +88,32 @@ export function Logs() {
       id: "shippingAddress",
       Cell: ShippingField, // new
     },{
-      Header: "Created At",
-      accessor: "createdAt",
-      id: "createdAt",
-      Cell: DateField, // new
-    },{
       Header: "Comments",
       accessor: "comments",
       id: "comments",
     },{
-      Header: "Invoice Stamp",
-      accessor: "invoiceStamp",
-      id: "invoiceStamp",
+      Header: "Created At",
+      accessor: "createdAt",
+      id: "createdAt",
       Cell: DateField, // new
     }
   ]
 
+  const handleVisibility = visibility => {
+    // 👇️ take parameter passed from Child component
+    setVisible(visibility);
+  };
 
   
   return (
     <div class="container mx-auto">
         <div className="mt-5">
         <div className="mb-6">
-              <span class="-z-10 relative top-1.5 ml-3 inline-block align-baseline text-5xl font-bold text-gray-700">Deliveries 📄 🔜</span>
+              <span class="relative top-1.5 ml-3 inline-block align-baseline text-5xl font-bold text-gray-700">Exchanges 🚴‍♂️ 🔙</span>
+            </div>
+            <Table  columns={columns} data={data}  />
         </div>
-        <Table columns={columns} data={data} />
-        </div>
-        <div className="mb-6">
-              <span class="-z-10 relative top-1.5 ml-3 inline-block align-baseline text-5xl font-bold text-gray-700">Returns 📄 🔙</span>
-        </div>
-        <Table columns={columns} data={oldData} />
+        <DeliveryForm handleVisibility={handleVisibility} visible={visible} type={"Order"}/>
     </div>
   );
 }

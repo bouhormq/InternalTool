@@ -8,7 +8,7 @@ import { doc, getDoc } from 'firebase/firestore'
 import db from '../firebase'
 import axios from 'axios'
 import { useState } from 'react'
-import { v4 as uuidv4 } from 'uuid';
+const orderid = require('order-id')('key');
 import { setDoc } from 'firebase/firestore'
 import { collection, onSnapshot, query, orderBy,where } from 'firebase/firestore';
 import ClientForm from './clientForm'
@@ -110,31 +110,18 @@ export function ShippingField({ value }) {
   );
 };
 
-export function ItemsField({ value }) {
-  let items = ""
-  for(let i = 0; i < value.length; ++i){
-    items += value[i].sku + ": " + value[i].quantity;
-    if(i !== value.length-1){
-      items +=  ", "
-    }
-  }
-  return (
-    <span>
-      {items} 
-    </span>
-  );
-};
+
 
 async function Fulfil(row) {
   let shop = row.shop
-  let order_id = row.id
-  let fulfillment_id = row.id
+  let deliveryID = row.id
+  let fulfillmentId = row.id
   let appdocRef = doc(db, "app-sessions", "offline_"+shop);
   let appdocSnap = await getDoc(appdocRef);
   if(appdocSnap.exists()){
     const app_session = appdocSnap.data();
     await axios.post(
-      `https://0dfc15a9470679b09207ae8ba56a3354:472e3009fef7c56c7e90c596cef543e1@${app_session.shop}/admin/api/2022-04/orders/${order_id}/fulfillments/${fulfillment_id}/complete.json`,
+      `https://0dfc15a9470679b09207ae8ba56a3354:472e3009fef7c56c7e90c596cef543e1@${app_session.shop}/admin/api/2022-04/orders/${deliveryID}/fulfillments/${fulfillmentId}/complete.json`,
        {
         headers: {
           'X-Shopify-Access-Token': app_session.accessToken,
@@ -214,61 +201,9 @@ export function StatusPillTotalInventory({ value }) {
   );
 };
 
-export function StatusPillInventory({ value }) {
-  return (
-    <span
-      className={
-        classNames(
-          "px-3 py-1 uppercase leading-wide font-bold text-xs rounded-full shadow-sm ",
-          value["DE-FFM-NWES"].inventory_quantity > 19 ? "bg-emerald-500	 text-emerald-100" : null,
-          10 < value["DE-FFM-NWES"].inventory_quantity < 20 ? "bg-sky-100 text-sky-800" : null,
-          value["DE-FFM-NWES"].inventory_quantity < 10 ? "bg-red-100 text-red-800" : null,
-        )
-      }
-    >
-      {"DE-FFM-NWES" + "-(" + value["DE-FFM-NWES"].shelf.join('-') + "): " + value["DE-FFM-NWES"].inventory_quantity}
-    </span>
-  );
-};
-
-
-
-
-
-
 function ClientsTable({ columns, data }) {
   const [visible, setVisible] = useState(false);
-  const [clients, setClients] = useState([]);
-  const [warehouses, setWarehouses] = useState([]);
-  useEffect(() => {
-    const colRef = collection(db, "clients" )
-    const colRef2 = collection(db, "warehouses" )
-    //real time update
-    let isMounted = true;
-    onSnapshot(colRef, (snapshot) => {
-      setClients([])
-      if (isMounted) {
-        let clients = {};
-        snapshot.docs.forEach((doc) => {
-          clients[doc.id] = doc.data()
-          setClients(clients)
-        })
-    }
-    })
-    onSnapshot(colRef2, (snapshot) => {
-      setWarehouses([])
-      if (isMounted) {
-        let warehouse = {};
-          snapshot.docs.forEach((doc) => {
-            warehouse[doc.id] = doc.data()
-            setWarehouses(warehouse)
-          })
-        }
-    })
-    return () => {
-      isMounted = false;
-    };
-    }, [])
+  
   
   // Use the state and functions returned from useTable to build your UI
   const {
@@ -373,7 +308,7 @@ function ClientsTable({ columns, data }) {
                               className="px-6 py-4 whitespace-nowrap"
                               role="cell"
                               onClick={() => {
-                                if(cell.column.Header === "Action" && row.original.fulfillment_status === "open" ){
+                                if(cell.column.Header === "Action" && row.original.fulfillmentStatus === "open" ){
                                   Fulfil(row.original)
                                 }
                               }}

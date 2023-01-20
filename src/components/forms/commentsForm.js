@@ -1,31 +1,34 @@
 import React from 'react'
 import { useState } from 'react'
-import db from '../firebase'
+import db from '../../firebase'
 import { setDoc,doc } from 'firebase/firestore';
+import {FlowToInventory} from '../tableCells'
+import { deliveryToFlow } from './handleForm';
 
-
-export function CancelForm({visible, handleVisibility, order, type}) {
-    const [inputFields, setInputFields] = useState(order.cancel_reason);
+export function CommentsForm({visible, handleVisibility, delivery, flow}) {
+    const [inputFields, setInputFields] = useState(delivery.comments);
     const handleSubmit = async (e) => {
       e.preventDefault();
-      order.cancel_reason = inputFields
-      order.fulfillment_status = type
-      console.log(order)
-      if(order.delivery_at){
-        console.log("Delivery updated")
-        await setDoc(doc(db, "orders", order.client + "-" + order.order_number), order);
-        await setDoc(doc(db, "clients", `${order.client}/orders/${order.order_number}`), order)
+      if(!flow){
+        delivery.comments = inputFields
+        if(delivery.type === "Order"){
+          await setDoc(doc(db, "orders", delivery.deliveryID), delivery);
+          await setDoc(doc(db, "clients", `${delivery.client.clientID}/orders/${delivery.deliveryID}`), delivery)
+        }
+        else if (delivery.type === "Return"){
+          await setDoc(doc(db, "returns", delivery.deliveryID), delivery);
+          await setDoc(doc(db, "clients", `${delivery.client.clientID}/returns/${delivery.deliveryID}`), delivery)
+        }
       }
-      else if(order.return_at){
-        console.log("Return updated")
-        await setDoc(doc(db, "returns", order.client + "-" + order.return_number), order);
-        await setDoc(doc(db, "clients", `${order.client}/returns/${order.return_number}`), order)
+      else{
+        delivery.comments = inputFields
+        FlowToInventory(delivery,false,"success",null) 
       }
       handleVisibility(false)
     };
 
     const handleChangeInput = (event) =>{
-        setInputFields(event.target.value);
+    setInputFields(event.target.value);
     }
 
 
@@ -37,8 +40,8 @@ export function CancelForm({visible, handleVisibility, order, type}) {
                 <form onSubmit={handleSubmit}>
                     <div class="grid gap-6 mb-6 md:grid-cols-2">
                       <div style={{gridColumn: "1 / -1"}}>
-                        <label for="cancel_reason" class="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-300">Reason</label>
-                        <input type="text" value={inputFields} onChange={event => handleChangeInput(event)} name="cancel_reason" id="cancel_reason" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="" required=""/>
+                        <label for="comments" class="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-300">Comments</label>
+                        <input type="text" value={inputFields} onChange={event => handleChangeInput(event)} name="comments" id="comments" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Comments..." required=""/>
                       </div>
                     </div>
                     <button type="submit" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">Save</button>

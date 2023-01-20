@@ -21,7 +21,7 @@ export function Navbar(){
 
   useEffect(() => {
     if (user !== null) {
-      navigate('deliveries');
+      navigate('orders');
     }
   }, [user]);
 
@@ -55,14 +55,18 @@ export function Navbar(){
       <div className='bg-gray-200 w-full'>
       <nav class="flex flex-wrap border-b border-gray-200">
         <img  src={logo} style={{display:"block", height:"25px", marginTop:"15px", marginLeft:"10px", marginRight:"15px"}}/>
-        <Link class="inline-block text-gray-500 hover:text-gray-600 hover:bg-gray-50 rounded-t-lg py-4 px-4 text-sm font-medium text-center" to="deliveries"> Deliveries </Link>
+        <Link class="inline-block text-gray-500 hover:text-gray-600 hover:bg-gray-50 rounded-t-lg py-4 px-4 text-sm font-medium text-center" to="orders"> Orders </Link>
         <Link class="inline-block text-gray-500 hover:text-gray-600 hover:bg-gray-50 rounded-t-lg py-4 px-4 text-sm font-medium text-center" to="returns"> Returns </Link>
+        <Link class="inline-block text-gray-500 hover:text-gray-600 hover:bg-gray-50 rounded-t-lg py-4 px-4 text-sm font-medium text-center" to="exchanges"> Exchanges </Link>
         <Link class="inline-block text-gray-500 hover:text-gray-600 hover:bg-gray-50 rounded-t-lg py-4 px-4 text-sm font-medium text-center" to="logs"> Logs </Link>
-        <Link class="inline-block text-gray-500 hover:text-gray-600 hover:bg-gray-50 rounded-t-lg py-4 px-4 text-sm font-medium text-center" to="flow"> Flow </Link>
+        <Link class="inline-block text-gray-500 hover:text-gray-600 hover:bg-gray-50 rounded-t-lg py-4 px-4 text-sm font-medium text-center" to="flows"> Flows </Link>
         <Link class="inline-block text-gray-500 hover:text-gray-600 hover:bg-gray-50 rounded-t-lg py-4 px-4 text-sm font-medium text-center" to="inventory"> Inventory </Link>
         <Link class="inline-block text-gray-500 hover:text-gray-600 hover:bg-gray-50 rounded-t-lg py-4 px-4 text-sm font-medium text-center" to="clients"> Clients</Link>
+        <Link class="inline-block text-gray-500 hover:text-gray-600 hover:bg-gray-50 rounded-t-lg py-4 px-4 text-sm font-medium text-center" to="recipients"> Recipients</Link>
+        <Link class="inline-block text-gray-500 hover:text-gray-600 hover:bg-gray-50 rounded-t-lg py-4 px-4 text-sm font-medium text-center" to="contacts"> Contacts</Link>
         <Link class="inline-block text-gray-500 hover:text-gray-600 hover:bg-gray-50 rounded-t-lg py-4 px-4 text-sm font-medium text-center" to="warehouses"> Warehouses</Link>
         <Link class="inline-block text-gray-500 hover:text-gray-600 hover:bg-gray-50 rounded-t-lg py-4 px-4 text-sm font-medium text-center" to="messages"> Messages</Link>
+        <Link class="inline-block text-gray-500 hover:text-gray-600 hover:bg-gray-50 rounded-t-lg py-4 px-4 text-sm font-medium text-center" to="calendar"> Calendar</Link>
         {/*
         <div className="logo">
             <img src={logo} width="155"  style={{position: "absolute", top: "0px", right: "0px", marginRight: "10px", marginTop: "10px"}}/>

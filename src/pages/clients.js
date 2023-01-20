@@ -3,8 +3,8 @@ import { collection, onSnapshot} from 'firebase/firestore';
 import { useEffect, useState } from 'react';
 import Table from '../components/table';
 import plus from "../media/plus-white.png"
-import ClientForm from '../components/clientForm';
-import {ExportClient} from '../components/tableCells'
+import ClientForm from '../components/forms/clientForm';
+import {ExportClient, ActionClient} from '../components/tableCells'
 import React from 'react';
 
 
@@ -31,6 +31,11 @@ export function Clients() {
   }, [])
 
   const columns = [
+    {
+      Header: "Action",
+      id: "action",
+      Cell: ActionClient
+    },
     {
       Header: "Name",
       accessor: "name",

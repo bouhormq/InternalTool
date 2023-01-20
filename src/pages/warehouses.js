@@ -4,18 +4,17 @@ import { useEffect, useState } from 'react';
 import Table from '../components/table';
 import plus from "../media/plus-white.png"
 import React from 'react';
-import { WarehouseForm } from '../components/warehouseForm';
+import { WarehouseForm } from '../components/forms/warehouseForm';
+import { PostalCodes, ActionWarehouse } from '../components/tableCells';
 
 
 export function Warehouses() {
   const [data, setData] = useState([]);
   const [visible, setVisible] = useState(false);
-  const [inventory, setInvetory] = useState({});
 
 
   
   useEffect(() => {
-    const colRef1 = collection(db, "inventory" )
     const colRef2 = collection(db, "warehouses" )
     let isMounted = true;
     onSnapshot(colRef2, (snapshot) => {
@@ -26,35 +25,19 @@ export function Warehouses() {
         })
       }
     })
-    onSnapshot(colRef1, (snapshot) => {
-      setInvetory([])
-      if (isMounted) {
-        snapshot.docs.forEach((doc) => {
-          setInvetory((prev) => [...prev, doc.data()])
-        })  
-      }
-    })
     return () => {
       isMounted = false;
     };
   }, [])
 
-  const PostalCodes = ({ values }) => {
-    // Loop through the array and create a badge-like component instead of a comma-separated string
-    return (
-      <>
-        {values.map((postal_code, idx) => {
-          return (
-            <span key={idx} className="badge">
-              {postal_code+" "}
-            </span>
-          );
-        })}
-      </>
-    );
-  };
 
   const columns = [
+    {
+      Header: "Action",
+      accessor: "action",
+      id: "action",
+      Cell: ActionWarehouse
+    },
     {
       Header: "Name",
       accessor: "id",
@@ -67,8 +50,8 @@ export function Warehouses() {
     },
     {
       Header: "Delivers To",
-      accessor: "delivers_to",
-      id: "delivers_to",
+      accessor: "deliversTo",
+      id: "deliversTo",
       Cell: ({ cell: { value } }) => <PostalCodes values={value} />
     },
   ]
@@ -93,7 +76,7 @@ export function Warehouses() {
         </div>      
         <Table columns={columns} data={data} button={<AddButton/>}/>
       </div>
-      <WarehouseForm handleVisibility={handleVisibility} visible={visible} inventory={inventory}/>
+      <WarehouseForm handleVisibility={handleVisibility} visible={visible} edit={false}/>
     </div>
   );
 }

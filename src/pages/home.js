@@ -22,7 +22,7 @@ export  function Home(){
 
   useEffect(() => {
     if (user !== null && user !== {}) {
-      navigate('deliveries');
+      navigate('orders');
     }
   }, [user]);
 

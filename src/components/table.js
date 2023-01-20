@@ -147,7 +147,7 @@ function Table({ columns, data, button}) {
                   setPageSize(Number(e.target.value))
                 }}
               >
-                {[5, 10, 20].map(pageSize => (
+                {[5, 10, 25, 50, 100].map(pageSize => (
                   <option key={pageSize} value={pageSize}>
                     Show {pageSize}
                   </option>
@@ -156,7 +156,7 @@ function Table({ columns, data, button}) {
             </label>
           </div>
           <div>
-            <nav className="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
+            <nav className="-z-10 relative inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
               <PageButton
                 className="rounded-l-md"
                 onClick={() => gotoPage(0)}

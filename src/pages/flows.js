@@ -3,24 +3,20 @@ import Table from '../components/table';
 import db from '../firebase';
 import { collection, onSnapshot, query, orderBy,where } from 'firebase/firestore';
 import { useEffect, useState } from 'react';
-import { DateField, ItemsField, ActionFlow } from '../components/tableCells';
+import { DateField, ItemsField, ActionFlow,StatusPill } from '../components/tableCells';
 import plus from "../media/plus-white.png"
-import { FlowForm } from '../components/flowForm';
+import { FlowsForm } from '../components/forms/flowsForm';
 import React from 'react';
 
 
-export function Flow() {
+export function Flows() {
   const [incoming, setIncoming] = useState([]);
   const [outgoing, setOutgoing] = useState([]);
   const [type, setType] = useState();
   const [visible, setVisible] = useState(false);
-  const [clients, setClients] = useState({});
-  const [warehouses, setWarehouses] = useState(
-    {"DE-FFM-NWES": {address: "Finkenhofstraße 12, 60322 Frankfurt am Main, Germany", city: "Frankfurt am Main", country: "Germany",country_code: "DE", delivers_to: ['60306', '60308', '60310', '60311', '60312', '60313', '60314', '60315', '60316', '60318', '60320', '60322', '60323', '60325', '60329', '60385', '60487', '60594', '60596'], postal_code: "60322", province: "Hesse"}},
-  );
   
   useEffect(() => {
-    const colRef1 = collection(db, "flow" )
+    const colRef1 = collection(db, "flows" )
     const q1 = query(colRef1, where("direction", "==", "outgoing"));
     const q2 = query(colRef1, where("direction", "==", "incoming"));
 
@@ -54,37 +50,70 @@ export function Flow() {
       Cell: ActionFlow, // new
     },
     {
+      Header: "ID",
+      id: "id",
+      accessor: "id", // new
+    },
+    {
       Header: "Warehouse",
-      accessor: "warehouse",
-      id: "warehouse",
+      accessor: "assignedWarehouse",
+      id: "assignedWarehouse",
     },
     {
-      Header: "Items",
-      accessor: "line_items",
-      id: "line_items",
-      Cell: ItemsField, // new
-    },
-    {
-      Header: "Recorded At",
-      accessor: "created_at",
-      id: "created_at",
+      Header: "Fulfillment Status",
+      accessor: "fulfillmentStatus",
+      id: "fulfillmentStatus",
+      Cell: StatusPill, // new
+    },{
+      Header: "Delivery At",
+      accessor: "deliveryAt",
+      id: "deliveryAt",
       Cell: DateField, // new
     },
     {
-      Header: "Client",
-      accessor: "client",
-      id: "client",
+      Header: "Line Items",
+      accessor: "lineItems",
+      id: "lineItems",
+      Cell: ItemsField, // new
     },
     {
+      Header: "Client",
+      accessor: "client.name",
+      id: "client",
+    },{
       Header: "Type",
       accessor: "type",
       id: "type",
+    },{
+      Header: "Contact",
+      accessor: "contact.name",
+      id: "contact",
+    },{
+      Header: "Created At",
+      accessor: "createdAt",
+      id: "createdAt",
+      Cell: DateField, // new
+    },
+    {
+      Header: "Updated At",
+      accessor: "updatedAt",
+      id: "updatedAt",
+      Cell: DateField, // new
+    },{
+      Header: "Comments",
+      accessor: "comments",
+      id: "comments",
+    },{
+      Header: "Invoice Stamp",
+      accessor: "invoiceStamp",
+      id: "invoiceStamp",
+      Cell: DateField, // new
     }
   ]
-  const handleVisibility = (visibility,newtype) => {
+  const handleVisibility = async (visibility,newtype) => {
     // 👇️ take parameter passed from Child component
-    setType(newtype)
-    setVisible(visibility);
+     await setType(newtype)
+     await setVisible(visibility);
   };
 
   const AddButton = ({newtype}) => {
@@ -99,19 +128,19 @@ export function Flow() {
     <div class="container mx-auto">
         <div className="mt-5">
           <div className="mb-6">
-                <span class="relative top-1.5 ml-3 inline-block align-baseline text-5xl font-bold text-gray-700">Outgoing 🚚 🔜</span>
+                <span class="relative top-1.5 ml-3 inline-block align-baseline text-5xl font-bold text-gray-700 -z-10">Outgoing 🚚 🔜</span>
               </div>
           <div className="mt-5">
             <Table columns={columns} data={outgoing} button={<AddButton newtype="outgoing"/>} />
           </div>
           </div>
           <div className="mb-6">
-            <span  class="relative top-1.5 ml-3 inline-block align-baseline text-5xl font-bold text-gray-700">Incoming 🚚 🔙</span>
+            <span  class="relative top-1.5 ml-3 inline-block align-baseline text-5xl font-bold text-gray-700 -z-10">Incoming 🚚 🔙</span>
           </div>
           <div className="mt-5">
             <Table  columns={columns} data={incoming} button={<AddButton newtype="incoming"/>}/>
           </div>
-          <FlowForm handleVisibility={handleVisibility} visible={visible} type={type}/>
+          <FlowsForm handleVisibility={handleVisibility} visible={visible} direction={type} key={type} edit={false}/>
         </div>  
   );
 }

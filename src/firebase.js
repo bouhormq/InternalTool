@@ -16,7 +16,10 @@ const firebaseConfig = {
   storageBucket: "onespotapp-45841.appspot.com",
   messagingSenderId: "414345920391",
   appId: "1:414345920391:web:e8d3eb4fe6342135c35d22",
-  measurementId: "G-R2ME43GQYD"
+  measurementId: "G-R2ME43GQYD",
+  clientId: "414345920391-du9k4dacovq09q49q6dgqsqnp3vdf4fm.apps.googleusercontent.com",
+  scopes: ['email', 'profile', 'https://www.googleapis.com/auth/calendar', 'openid'],
+  discoveryDocs: ['https://www.googleapis.com/discovery/v1/apis/drive/v3/rest']
 };
  
 // Initialize Firebase

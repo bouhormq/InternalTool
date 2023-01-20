@@ -2,25 +2,24 @@ import Table from '../components/table';
 import db from '../firebase';
 import { collection, onSnapshot } from 'firebase/firestore';
 import { useEffect, useState } from 'react';
-import  {StatusPillTotalInventory,StatusPillInventory ,DateField,DeleteInventory} from '../components/tableCells';
+import  {StatusPillTotalInventory,StatusPillInventory ,DateField, ActionInventory} from '../components/tableCells';
 import plus from "../media/plus-white.png"
-import { InventoryForm } from '../components/inventoryForm';
+import { InventoryForm } from '../components/forms/inventoryForm';
 import React from 'react';
+import { UserAuth } from '../context/authContex';
+
 
 
 export function Inventory() {
     const [data, setData] = useState([]);
     const [visible, setVisible] = useState(false);
-    const [warehouses, setWarehouses] = useState(
-      {"DE-FFM-NWES": {address: "Finkenhofstraße 12, 60322 Frankfurt am Main, Germany", city: "Frankfurt am Main", country: "Germany",country_code: "DE", delivers_to: ['60306', '60308', '60310', '60311', '60312', '60313', '60314', '60315', '60316', '60318', '60320', '60322', '60323', '60325', '60329', '60385', '60487', '60594', '60596'], postal_code: "60322", province: "Hesse"}},
-    );
-    const [clients, setClients] = useState({"WISAG":{}});
+    const { warehouses} = UserAuth();
+
+    
 
 
     useEffect(() => {
       const colRef = collection(db, "inventory" )
-      const colRef2 = collection(db, "warehouses" )
-      const colRef1 = collection(db, "clients" )
       //real time update
       let isMounted = true;
       onSnapshot(colRef, (snapshot) => {
@@ -32,26 +31,7 @@ export function Inventory() {
         }
     })
     
-    onSnapshot(colRef1, (snapshot) => {
-      setClients([])
-      if (isMounted) {
-        let clients = {};
-        snapshot.docs.forEach((doc) => {
-          clients[doc.id] = doc.data()
-          setClients(clients)
-        })
-      }
-    })
-    onSnapshot(colRef2, (snapshot) => {
-      setWarehouses([])
-      if (isMounted) {
-        let warehouse = {};
-        snapshot.docs.forEach((doc) => {
-          warehouse[doc.id] = doc.data()
-          setWarehouses(warehouse)
-        })
-      }
-    })
+
     return () => {
       isMounted = false;
     };  
@@ -67,11 +47,11 @@ export function Inventory() {
           Header: "Action",
           accessor: "skuInt",
           id: "action",
-          Cell: DeleteInventory, // new
+          Cell: ActionInventory, // new
         },
         {
           Header: "Client",
-          accessor: "client",
+          accessor: "client.name",
           id: "client",
         },
         {
@@ -79,11 +59,6 @@ export function Inventory() {
           accessor: "sku",
           id: "sku",
         },
-        /*{
-          Header: "SKU (Internal)",
-          accessor: "skuInt",
-          id: "skuInt",
-        },*/
         {
           Header: "Title",
           accessor: "title",
@@ -91,8 +66,8 @@ export function Inventory() {
         },
         {
           Header: "Total Inventory Stock",
-          accessor: "inventory_total_stock",
-          id: "inventory_total_stock",
+          accessor: "inventoryTotalStock",
+          id: "inventoryTotalStock",
           Cell: StatusPillTotalInventory, // new
         },
         {
@@ -103,8 +78,8 @@ export function Inventory() {
         },
         {
           Header: "Created At",
-          accessor: "created_at",
-          id: "created_at",
+          accessor: "createdAt",
+          id: "createdAt",
           Cell: DateField, // new
         },
       ]
@@ -125,7 +100,7 @@ export function Inventory() {
             </div>
             <Table  columns={columns} data={data}  button={<AddButton/>}/>
         </div>
-        <InventoryForm handleVisibility={handleVisibility} visible={visible} warehouses={warehouses} clients={clients}/>
+        <InventoryForm handleVisibility={handleVisibility} visible={visible} edit={false}/>
     </div>
   );
 }
