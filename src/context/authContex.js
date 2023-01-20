@@ -4,7 +4,7 @@ import React from 'react';
 import {onSnapshot, collection} from 'firebase/firestore';
 import db from '../firebase'
 import { GoogleAuthProvider, signOut, signInWithCredential,onAuthStateChanged  } from 'firebase/auth'
-import gapi from '../gapi'
+import { gapi} from 'gapi-script'
 
 
 
@@ -14,6 +14,7 @@ const AuthContext = createContext();
 export const AuthContextProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [accessToken, setAccessToken] = useState({});
+  const [GoogleAuth, setGoogleAuth] = useState(null);
   const [clients, setClients] = useState({});
   const [dropDownClients, setDropDownClients] = useState([]);
   const [dropDownContacts, setDropDownContacts] = useState([]);
@@ -28,21 +29,61 @@ export const AuthContextProvider = ({ children }) => {
   const [inventory, setinventory] = useState({});
 
 
+  useEffect(() => {
+    console.log("HELLO")
+    async function fetchData() {
+      if(GoogleAuth){
+        const googleUser = await GoogleAuth.signIn()
+        console.log(googleUser)
+        console.log(googleUser.getAuthResponse())
+        const token = googleUser.getAuthResponse().id_token
+        const credential = GoogleAuthProvider.credential(token)
+        console.log(credential)
+        const response = await signInWithCredential(auth, credential)
+        console.log(response)
+      }
+    }
+    fetchData();
+}, [GoogleAuth]);
+
+
   const googleSignIn = async () => {
-      const googleAuth = gapi.auth2.getAuthInstance()
-      const googleUser = await googleAuth.signIn()
-      console.log(googleUser)
-      console.log(googleUser.getAuthResponse())
-      const token = googleUser.getAuthResponse().id_token
-      const credential = GoogleAuthProvider.credential(token)
-      console.log(credential)
-      const response = await signInWithCredential(auth, credential)
-      console.log(response)
+    
+  var SCOPE = 'openid https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/calendar';
+  function handleClientLoad() {
+    // Load the API's client and auth2 modules.
+    // Call the initClient function after the modules load.
+    gapi.load('client:auth2', initClient);
+  }
+
+  function initClient() {
+    // In practice, your app can retrieve one or more discovery documents.
+    var discoveryUrl = 'https://www.googleapis.com/discovery/v1/apis/drive/v3/rest';
+
+    // Initialize the gapi.client object, which app uses to make API requests.
+    // Get API key and client ID from API Console.
+    // 'scope' field specifies space-delimited list of access scopes.
+    gapi.client.init({
+        apiKey: "AIzaSyBi-kWJ091WgznkX5WSfJZGo50Kmkfkp20",
+        clientId: "414345920391-du9k4dacovq09q49q6dgqsqnp3vdf4fm.apps.googleusercontent.com",
+        scope: SCOPE,
+      'discoveryDocs': [discoveryUrl],
+    }).then(async function () {
+      console.log(gapi.auth2.getAuthInstance())
+      setGoogleAuth(gapi.auth2.getAuthInstance())
+
+      // Handle initial sign-in state. (Determine if user is already signed in.)
+
+      // Call handleAuthClick function when user clicks on
+      //      "Sign In/Authorize" button.
+    });
+  }
+  handleClientLoad()
   }
   
   const logOut = async () => {
     try {
-      await gapi.auth2.getAuthInstance().signOut()
+      await GoogleAuth.signOut()
       console.log('User is signed out from gapi.')
   
       await signOut(auth)
