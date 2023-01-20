@@ -1,5 +1,5 @@
 import './index.css'
-import React from 'react';
+import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route} from "react-router-dom";
 import { Orders } from './pages/orders';
 import { Inventory } from './pages/inventory'
@@ -17,13 +17,15 @@ import {Recipients} from './pages/recipients'
 import {Contacts} from './pages/contacts'
 import { Exchanges } from './pages/exchanges';
 import { Calendars } from './pages/calendar';
+import { onLoad } from './gapi';
 
 
 
 
 function App() {
-
-  
+  useEffect(() => {
+    onLoad()
+  }, []);  
   return (
     <div className="App">
       <AuthContextProvider>
