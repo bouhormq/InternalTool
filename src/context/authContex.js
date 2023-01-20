@@ -33,14 +33,15 @@ export const AuthContextProvider = ({ children }) => {
     console.log("HELLO")
     async function fetchData() {
       if(GoogleAuth){
-        const googleUser = await GoogleAuth.signIn().then(async function(){
-          console.log(googleUser)
-          console.log(googleUser.getAuthResponse())
-          const token = googleUser.getAuthResponse().id_token
+        console.log("GoogleAuth: ",GoogleAuth)
+        await GoogleAuth.signIn().then(async function(value){
+          console.log("getAuthResponse(): ",value.getAuthResponse())
+          const token = value.getAuthResponse().id_token
+          console.log("getAuthResponse().id_token: ", token)
           const credential = GoogleAuthProvider.credential(token)
-          console.log(credential)
+          console.log("credential",credential)
           const response = await signInWithCredential(auth, credential)
-          console.log(response)
+          console.log("response", response)
         })
       }
     }
