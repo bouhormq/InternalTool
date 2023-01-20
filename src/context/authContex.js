@@ -29,10 +29,9 @@ export const AuthContextProvider = ({ children }) => {
 
 
   const googleSignIn = async () => {
-      console.log("MAMA")
       const googleAuth = gapi.auth2.getAuthInstance()
-      console.log(googleAuth)
       const googleUser = await googleAuth.signIn()
+      console.log(googleUser)
       console.log(googleUser.getAuthResponse())
       const token = googleUser.getAuthResponse().id_token
       const credential = GoogleAuthProvider.credential(token)
