@@ -34,10 +34,11 @@ export const AuthContextProvider = ({ children }) => {
       const googleUser = await googleAuth.signIn()
   
       const token = googleUser.getAuthResponse().id_token
+      console.log(token)
       const credential = GoogleAuthProvider.credential(token)
-  
+      console.log(credential)
       const response = await signInWithCredential(auth, credential)
-      
+      console.log(response)
       
      
       // store user
