@@ -34,15 +34,22 @@ export const AuthContextProvider = ({ children }) => {
     async function fetchData() {
       if(GoogleAuth){
         console.log("GoogleAuth: ",GoogleAuth)
-        await GoogleAuth.signIn().then(async function(value){
-          console.log("getAuthResponse(): ",value.getAuthResponse())
-          const token = value.getAuthResponse().id_token
-          console.log("getAuthResponse().id_token: ", token)
-          const credential = GoogleAuthProvider.credential(token)
-          console.log("credential",credential)
-          const response = await signInWithCredential(auth, credential)
-          console.log("response", response)
-        })
+          Promise.resolve(gapi.auth2.getAuthInstance().signIn()).then(async function(value) {
+              console.log("signIn(): ",value)
+              console.log("getAuthResponse(): ",value.getAuthResponse())
+              const token = value.getAuthResponse().id_token
+              console.log("getAuthResponse().id_token: ", token)
+              const credential = GoogleAuthProvider.credential(token)
+              console.log("credential",credential)
+              const response = await signInWithCredential(auth, credential)
+              console.log("response", response)
+          }).catch(function(error) {
+            if (error && error.error == 'popup_blocked_by_browser') {
+              // A popup has been blocked by the browser
+            } else {
+              // some other error
+            }
+          });
       }
     }
     fetchData();
@@ -73,11 +80,6 @@ export const AuthContextProvider = ({ children }) => {
     }).then(async function () {
       console.log(gapi.auth2.getAuthInstance())
       setGoogleAuth(gapi.auth2.getAuthInstance())
-
-      // Handle initial sign-in state. (Determine if user is already signed in.)
-
-      // Call handleAuthClick function when user clicks on
-      //      "Sign In/Authorize" button.
     });
   }
   handleClientLoad()
@@ -85,7 +87,7 @@ export const AuthContextProvider = ({ children }) => {
   
   const logOut = async () => {
     try {
-      await GoogleAuth.signOut()
+      await gapi.auth2.getAuthInstance().signOut()
       console.log('User is signed out from gapi.')
   
       await signOut(auth)
