@@ -2,12 +2,24 @@ import React from 'react'
 import { doc } from 'firebase/firestore'
 import db from '../../firebase'
 import { useState } from 'react'
-import { setDoc } from 'firebase/firestore'
-import { checkEmptyValues } from './handleForm'
+import { setDoc, getCountFromServer, query, collection, where } from 'firebase/firestore'
+import { UserAuth } from '../../context/authContex'
+const orderid = require('order-id')('key');
+
+
 
 
 export default function ClientForm({ visible, handleVisibility }) {
-  const [inputFieldsGlobal, setInputFieldsGlobal] = useState({ client: "" });
+  const {user} = UserAuth();
+  const [inputFieldsGlobal, setInputFieldsGlobal] = useState([{ 
+    clientID: "" ,
+    name: "",
+    id: "",
+    createdAt: "",
+    createdBy: user.email,
+    updatedAt: "",
+    updatedBy: user.email
+  }]);
   const [alertVisible, setAlertVisible] = useState(false);
 
   async function CreateStats(client) {
@@ -36,16 +48,25 @@ export default function ClientForm({ visible, handleVisibility }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (checkEmptyValues(inputFieldsGlobal)) {
-      handleVisibility(false)
-      await setDoc(doc(db, "clients", inputFieldsGlobal.client), {
-        name: inputFieldsGlobal.client,
-        clientID: inputFieldsGlobal.client,
-      })
-      await CreateStats(inputFieldsGlobal.client);
-      await CreateInfo(inputFieldsGlobal.client);
-      setAlertVisible(false)
-      clearClientForm()
+    if (inputFieldsGlobal[0].name.length > 0) {
+      inputFieldsGlobal[0].id = orderid.generate()
+      inputFieldsGlobal[0].clientID = `${inputFieldsGlobal[0].name}-${inputFieldsGlobal[0].id}`
+      inputFieldsGlobal[0].createdAt = new Date().toLocaleString("sv", { timeZone: "Europe/Berlin" })
+      inputFieldsGlobal[0].updatedAt = new Date().toLocaleString("sv", { timeZone: "Europe/Berlin" })
+      const snap = await getCountFromServer(query(
+        collection(db, 'clients'), where("name", '==', inputFieldsGlobal[0].name)
+      ))
+      if(snap.data().count > 0){
+        setAlertVisible(true)
+      }
+      else{
+        await setDoc(doc(db, "clients", inputFieldsGlobal[0].clientID), inputFieldsGlobal[0])
+        handleVisibility(false)
+        setAlertVisible(false)
+        clearClientForm()
+      }      
+      //await CreateStats(inputFieldsGlobal.client);
+      //await CreateInfo(inputFieldsGlobal.client);
     }
     else {
       setAlertVisible(true)
@@ -53,12 +74,28 @@ export default function ClientForm({ visible, handleVisibility }) {
   };
 
   const handleChangeInput = (event) => {
-    setInputFieldsGlobal({ client: event.target.value })
+    setInputFieldsGlobal([{ 
+      clientID: "" ,
+      name: event.target.value,
+      id: "",
+      createdAt: "",
+      createdBy: user.email,
+      updatedAt: "",
+      updatedBy: user.email
+    }])
   }
 
   const clearClientForm = () => {
     handleVisibility(false)
-    setInputFieldsGlobal([{ client: "" }])
+    setInputFieldsGlobal([{ 
+      clientID: "" ,
+      name: "",
+      id: "",
+      createdAt: "",
+      createdBy: user.email,
+      updatedAt: "",
+      updatedBy: user.email
+    }])
     setAlertVisible(false)
   }
 
@@ -71,10 +108,11 @@ export default function ClientForm({ visible, handleVisibility }) {
         <div className="p-5 m-10 max-h-xl bg-white rounded-lg border border-gray-200 shadow-md dark:bg-gray-800 dark:border-gray-700">
           {alertVisible &&
             <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-6" role="alert">
-              <strong class="font-bold">🧙‍♂️ Hello traveler...</strong>
-              <span class="block sm:inline">Double check that all the fields are not empty</span>
+              <strong class="block font-bold">🧙‍♂️ Hello traveler... Double check that:</strong>
+              <span class="block">- All the fields are not empty.</span>
+              <span class="block">- There is no other client has the same name.</span>
               <span class="absolute top-0 bottom-0 right-0 px-4 py-3">
-                <svg class="fill-current h-6 w-6 text-red-500" role="button" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><title>Close</title><path d="M14.348 14.849a1.2 1.2 0 0 1-1.697 0L10 11.819l-2.651 3.029a1.2 1.2 0 1 1-1.697-1.697l2.758-3.15-2.759-3.152a1.2 1.2 0 1 1 1.697-1.697L10 8.183l2.651-3.031a1.2 1.2 0 1 1 1.697 1.697l-2.758 3.152 2.758 3.15a1.2 1.2 0 0 1 0 1.698z" /></svg>
+                <svg onClick={() => setAlertVisible(false)} class="fill-current h-6 w-6 text-red-500" role="button" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><title>Close</title><path d="M14.348 14.849a1.2 1.2 0 0 1-1.697 0L10 11.819l-2.651 3.029a1.2 1.2 0 1 1-1.697-1.697l2.758-3.15-2.759-3.152a1.2 1.2 0 1 1 1.697-1.697L10 8.183l2.651-3.031a1.2 1.2 0 1 1 1.697 1.697l-2.758 3.152 2.758 3.15a1.2 1.2 0 0 1 0 1.698z" /></svg>
               </span>
             </div>
           }

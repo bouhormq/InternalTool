@@ -4,9 +4,11 @@ import db from '../../firebase'
 import { setDoc,doc } from 'firebase/firestore';
 import {FlowToInventory} from '../tableCells'
 import { deliveryToFlow } from './handleForm';
+import { UserAuth } from '../../context/authContex';
 
 export function CommentsForm({visible, handleVisibility, delivery, flow}) {
     const [inputFields, setInputFields] = useState(delivery.comments);
+    const {user} = UserAuth() 
     const handleSubmit = async (e) => {
       e.preventDefault();
       if(!flow){
@@ -22,7 +24,7 @@ export function CommentsForm({visible, handleVisibility, delivery, flow}) {
       }
       else{
         delivery.comments = inputFields
-        FlowToInventory(delivery,false,"success",null) 
+        FlowToInventory(delivery,false,"success",null, user) 
       }
       handleVisibility(false)
     };

@@ -70,6 +70,10 @@ export function Contacts() {
       Header: "Name",
       accessor: "name",
       id: "name",
+    },{
+      Header: "Role",
+      accessor: "role",
+      id: "role",
     },
     {
       Header: "Client",

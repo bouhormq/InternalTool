@@ -121,7 +121,7 @@ export const AuthContextProvider = ({ children }) => {
       setDropDownRiders([])
         let dropDownRiders = [];
         snapshot.docs.forEach((doc) => {
-          dropDownRiders.push({value:doc.data().name, label:`${doc.data().name} ${doc.data().lastName}`, number:doc.data().number, lastName: doc.data().lastName})
+          dropDownRiders.push({value:doc.data().name, label:`${doc.data().name} ${doc.data().lastName}`, number:doc.data().number, lastName: doc.data().lastName, riderID: doc.data().riderID})
         })
         setDropDownRiders(dropDownRiders)
     })

@@ -1,0 +1,462 @@
+Project OneSpot {
+  database_type: 'NoSql Firebase'
+  Note: '''
+    # OneSpot Database
+    **Best Practices**
+  '''
+}
+
+//Refs =>>
+
+Ref: collections.clients.clientID > documents.client.clientID // many-to-one
+
+Ref: documents.client.reminders > documents.reminder.reminderID // many-to-one
+Ref: documents.client.contacts > documents.contact.contactID // many-to-one
+Ref: documents.client.flows > documents.flow.flowID // many-to-one
+Ref: documents.client.inventory > documents.inventory.inventoryID // many-to-one
+Ref: documents.client.messages > documents.message.messageID // many-to-one
+Ref: documents.client.orders > documents.order.deliveryID // many-to-one
+Ref: documents.client.returns > documents.return.deliveryID // many-to-one
+Ref: documents.client.exchanges > documents.exchange.exchangeID // many-to-one
+Ref: documents.client.recipients > documents.recipient.recipientID // many-to-one
+Ref: documents.client.reschedules > documents.reschedule.rescheduleID // many-to-one
+Ref: documents.client.users > documents.user.userID // many-to-one
+
+
+Ref: collections.contacts.contactID > documents.contact.contactID // many-to-one
+Ref: collections.flows.flowID > documents.flow.flowID // many-to-one
+Ref: collections.inventory.inventoryID > documents.inventory.inventoryID // many-to-one
+Ref: collections.messages.messageID > documents.message.messageID // many-to-one
+Ref: collections.orders.deliveryID > documents.order.deliveryID // many-to-one
+Ref: collections.returns.deliveryID > documents.return.deliveryID // many-to-one
+Ref: collections.exchanges.exchangeID > documents.exchange.exchangeID // many-to-one
+Ref: collections.recipients.recipientID > documents.recipient.recipientID // many-to-one
+Ref: collections.reschedules.rescheduleID > documents.reschedule.rescheduleID // many-to-one
+Ref: collections.reminders.reminderID > documents.reminder.reminderID // many-to-one
+Ref: collections.users.userID > documents.user.userID // many-to-one
+Ref: collections.warehouses.warehouseID > documents.warehouse.warehouseID // many-to-one
+Ref: collections.riders.riderID > documents.rider.riderID // many-to-one
+
+
+Ref: documents.rider.orders > documents.order.deliveryID // many-to-one
+Ref: documents.rider.returns > documents.return.deliveryID // many-to-one
+Ref: documents.rider.exchanges > documents.exchange.exchangeID // many-to-one
+
+//Collections =>>
+
+Table collections.clients {
+  clientID documents [pk, default: '${name}-{id}'] 
+}
+
+Table collections.reminders {
+  reminderID document [pk, default: '${name}-{id}'] 
+}
+
+Table collections.riders {
+  riderID document
+}
+
+Table collections.contacts {
+  contactID document
+}
+
+Table collections.flows {
+  flowID document
+}
+
+Table collections.inventory {
+  inventoryID document
+}
+
+Table collections.messages {
+  messageID document
+}
+
+Table collections.orders {
+  deliveryID document
+}
+
+
+Table collections.warehouses {
+  warehouseID document [pk,default: '${id}']
+}
+
+Table collections.returns {
+  deliveryID document
+}
+
+Table collections.exchanges {
+  exchangeID document
+}
+
+Table collections.recipients {
+  recipientID document
+}
+
+Table collections.reschedules {
+  rescheduleID document
+}
+
+Table collections.users {
+  userID document
+}
+
+Table collections.kpis {
+  info string
+}
+
+//Documents =>>
+
+Table documents.client {
+  clientID string [pk, default: '${name}-{id}'] 
+  id string [note: 'Auto-generated via orderd-id package, can be used to calculate createdAt value'] 
+  name string [note: 'When attempted to add a new client, notify the user when client is already in the db and create a new documents if it already exists'] 
+  createdAt string [default: `new Date().toLocaleString("sv", { timeZone: "Europe/Berlin" })`]
+  createdBy string 
+  updatedAt string [note: 'Update this value when documents or subcollections are updated with new Date().toLocaleString("sv", { timeZone: "Europe/Berlin" })'] 
+  updatedBy string [default: `user.email`]
+  reminders collection [note: 'All documents in this collections have to be updated twice, once in the clients collections and once again in the main collections '] 
+  contacts collection [note: 'All documents in this collections have to be updated twice, once in the clients collections and once again in the main collections ']
+  flows collection [note: 'All documents in this collections have to be updated twice, once in the clients collections and once again in the main collections ']
+  inventory collection [note: 'All documents in this collections have to be updated twice, once in the clients collections and once again in the main collections ']
+  messages collection [note: 'All documents in this collections have to be updated twice, once in the clients collections and once again in the main collections ']
+  orders collection [note: 'All documents in this collections have to be updated twice, once in the clients collections and once again in the main collections ']
+  returns collection [note: 'All documents in this collections have to be updated twice, once in the clients collections and once again in the main collections ']
+  exchanges collection [note: 'All documents in this collections have to be updated twice, once in the clients collections and once again in the main collections ']
+  recipients collection [note: 'All documents in this collections have to be updated twice, once in the clients collections and once again in the main collections ']
+  reschedules collection [note: 'All documents in this collections have to be updated twice, once in the clients collections and once again in the main collections ']
+  users collection [note: 'All documents in this collections have to be updated twice, once in the clients collections and once again in the main collections ']
+  kpis collection [note: 'All documents in this collections have to be updated twice, once in the clients collections and once again in the main collections ']
+}
+
+Table documents.flow {
+  flowID string [pk, default: '${[D/WM]}-${[O/R/E/none]}-${clientID}-${recipientID}-${id}-${[R${numberReschedule}/none]}']
+  assignedWarehouse string [note: 'Field can be used to identify the warehouse']
+  cancelReason string
+  cancelledAt string
+  client map [default: '{clientID: "",name: ""}']
+  comments string
+  contact map [default: '{available:"" contactID:"",email:"",name:"",number:""}']
+  contractLength string
+  createdAt string
+  createdBy string 
+  daysOfWeek array
+  deliveryAt string
+  direction string
+  financialStatus string
+  frequency string
+  fulfillmentStatus string
+  id string [note: 'Auto-generated via orderd-id package, can be used to calculate createdAt value'] 
+  invoiceStamp string
+  lineItems arrayOfMaps [default: '[{id:{description:"" dimensions:{H:"",L:"",W:""},id:"",inventoryID:"",price:"",quantity:"",skuskuInt:"",title:"",weight:""}}]']
+  seriesID STRING
+  tos string
+  totalDimensions map [default:'{H:"",L:"",W:""}']
+  totalPrice number
+  totalWeight number
+  type string
+  updatedAt string [note: 'Update this value when documents or subcollections are updated with new Date().toLocaleString("sv", { timeZone: "Europe/Berlin" })'] 
+  updatedBy string
+}
+
+Table documents.reminder {
+  reminderID string [pk, default: '${name}-{id}']
+  client map [default: '{clientID:"" name:""}']
+  contact map [default: '{contactID:"" available:"",email:"",name:"",number:""}']   
+  content string
+  createdAt string [default: `new Date().toLocaleString("sv", { timeZone: "Europe/Berlin" })`]
+}
+
+Table documents.contact {
+  contactID string [pk, default: '${clientID}-{name}-{id}']
+  id string [note: 'Auto-generated via orderd-id package, can be used to calculate createdAt value'] 
+  client map [default: '{clientID:"" name:""}']
+  available boolean [default: true]
+  email string
+  name string
+  number string
+  availableWarehouses arrayOfMaps [default: '[{id:{name:"" recipientID:"",shippingAddress:{address:"",city:"",country:"", postalCode}}}]']
+}
+
+Table documents.inventory {
+  inventoryID string [pk, default: '${client.clientID}-${skuInt}-{id}']
+  barcode string
+  client map [default: '{clientID:"" name:""}']
+  createdAt string [default: `new Date().toLocaleString("sv", { timeZone: "Europe/Berlin" })`]
+  currency string [default: 'EUR']
+  dimensions map [default:'{H:"",L:"",W:""}']
+  id string
+  imageId string
+  inventory mapsOfMaps [default: '{id:{address:"" city:"",country:"",countryCode:"", postalCode:"",deliversTo:[],id:"",inventoryQuantity:""postalCode: ""province: "", shelf:[]}}}']
+  updatedAt atring [note: 'Update this value when documents or subcollections are updated with new Date().toLocaleString("sv", { timeZone: "Europe/Berlin" })'] 
+  inventoryTotalStock number
+  price number
+  sku string
+  skuInt string [default: '${client.clientID}-{sku}']
+  title string
+  unitOfLength string [default: 'M']
+  weight number 
+  weightUnit string [default: 'KG']
+}
+
+Table documents.message {
+  messageID string [pk, default: '${client.clientID}-${to}-{createdAt}-${id}']
+  id string
+  contact map [default: '{available:"" contactID:"",email:"",name:"",number:""}']
+  channelId string [default: '9127c97589944871a4b6488920d43dc7']
+  client map [default: '{clientID:"" name:""}']
+  content map  [default: '{text:""}']
+  messageid string  [note: 'Randomly generated by messagebird extension, different from messageID'] 
+  to string  
+  daily boolean
+  type string  [default: 'text']
+}
+
+
+Table documents.order {
+      deliveryID string [pk, default: '${client.clientID}-${recipient.recipientID}-${id}']
+      id string [note: 'Auto-generated via orderd-id package, can be used to calculate createdAt value'] 
+      type string [default:'Order']
+      totalDimensions map [default:'Sum of dimensions value of all elements in lineItems: {H:"",L:"",W:""}']
+      daysOfWeek array [default:'[Monday, Tueasday, Wednesday...]',note: 'Array of days of the week when a Jour Fix delivery is made, if empty when Jour Fix is selected no orders are created. Always empty when order is Instant or Appointment'] 
+      contractLength string [note:'Can be from 3 months to 12 months. Empty if orders is Appointment or Instant']
+      rider map [ref: - maps.rider.riderID]
+      totalWeight number [default:'Sum of weight value of all elements in lineItems']
+      contact map [note:"Auto-filled if only one possible contact for recipient, to be selected from recipient contact list otherwise", ref: < documents.recipient.contacts]
+      totalPrice number [default:'Sum of price value of all elements in lineItems']
+      financialStatus string
+      createdAt string [default: `new Date().toLocaleString("sv", { timeZone: "Europe/Berlin" })`]
+      cancelledAt string [default: `new Date().toLocaleString("sv", { timeZone: "Europe/Berlin" })`]
+      cancelReason string [note:'[Force Mayeur/Staff shortage/Not enough stock/No staff was present]']
+      assignedWarehouse string [note: 'id of warehouse responsible for the delivery, has to be present in availableWarehouses']
+      updatedAt string [default: `new Date().toLocaleString("sv", { timeZone: "Europe/Berlin" })`]
+      fulfillmentStatus string [default: 'open']
+      lineItems arrayOfMaps [note:'Never empty', ref: < maps.lineItem.inventoryID]
+      client map [ref: - maps.client.clientID]
+      invoiceStamp string 
+      deliveryAt string
+      recipient map [ref: - maps.recipient.recipientID]
+      tos string 
+      availableWarehouses array [note:'Array of different warehouse ids']
+      shippingAddress map [ref: - documents.recipient.shippingAddress]
+      frequency string
+      timeline map [default:'{
+        inProcessH: "00",
+        inProcessM: "00",
+        inProcessAMPM: "AM",
+        outForDeliveryH:"00",
+        outForDeliveryM:"00",
+        outForDeliveryAMPM:"AM",
+        arrivalNoteH:"00",
+        arrivalNoteM:"00",
+        arrivalNoteAMPM:"AM",
+        deliveredH:"00",
+        deliveredM:"00",
+        deliveredAMPM:"AM",
+        closedH:"00",
+        closedM:"00",
+        closedAMPM:"AM",
+        timeOnSite:"0 minutes",
+        inTime:true
+      }']
+      expectedTime string [note:'Value in min']
+      suggestedTimeOut string
+      deliveryDistance string [note:'Value in Km']
+      seriesID string
+      comments string
+      exchanged boolean
+      SMS array
+      reschedules array
+      numberReschedules number
+      recipientComments string
+}
+
+Table documents.return {
+      deliveryID string [pk, default: '${client.clientID}-${recipient.recipientID}-${id}']
+      id string [note: 'Auto-generated via orderd-id package, can be used to calculate createdAt value'] 
+      type string [default:'Return']
+      totalDimensions map [default:'Sum of dimensions value of all elements in lineItems: {H:"",L:"",W:""}']
+      daysOfWeek array [default:'[Monday, Tueasday, Wednesday...]',note: 'Array of days of the week when a Jour Fix delivery is made, if empty when Jour Fix is selected no orders are created. Always empty when order is Instant or Appointment'] 
+      contractLength string [note:'Can be from 3 months to 12 months. Empty if orders is Appointment or Instant']
+      rider map [ref: - maps.rider.riderID]
+      totalWeight number [default:'Sum of weight value of all elements in lineItems']
+      contact map [note:"Auto-filled if only one possible contact for recipient, to be selected from recipient contact list otherwise", ref: < documents.recipient.contacts]
+      totalPrice number [default:'Sum of price value of all elements in lineItems']
+      financialStatus string
+      createdAt string [default: `new Date().toLocaleString("sv", { timeZone: "Europe/Berlin" })`]
+      cancelledAt string [default: `new Date().toLocaleString("sv", { timeZone: "Europe/Berlin" })`]
+      cancelReason string [note:'[Force Mayeur/Staff shortage/Not enough stock/No staff was present]']
+      assignedWarehouse string [note: 'id of warehouse responsible for the delivery, has to be present in availableWarehouses']
+      updatedAt string [default: `new Date().toLocaleString("sv", { timeZone: "Europe/Berlin" })`]
+      fulfillmentStatus string [default: 'open']
+      lineItems arrayOfMaps [note:'Never empty', ref: < maps.lineItem.inventoryID]
+      client map [ref: - maps.client.clientID]
+      invoiceStamp string 
+      deliveryAt string
+      recipient map [ref: - maps.recipient.recipientID]
+      tos string 
+      availableWarehouses array [note:'Array of different warehouse ids']
+      shippingAddress map [ref: - documents.recipient.shippingAddress]
+      frequency string
+      timeline map [default:'{
+        inProcessH: "00",
+        inProcessM: "00",
+        inProcessAMPM: "AM",
+        outForDeliveryH:"00",
+        outForDeliveryM:"00",
+        outForDeliveryAMPM:"AM",
+        arrivalNoteH:"00",
+        arrivalNoteM:"00",
+        arrivalNoteAMPM:"AM",
+        deliveredH:"00",
+        deliveredM:"00",
+        deliveredAMPM:"AM",
+        closedH:"00",
+        closedM:"00",
+        closedAMPM:"AM",
+        timeOnSite:"0 minutes",
+        inTime:true
+      }']
+      expectedTime string [note:'Value in min']
+      suggestedTimeOut string
+      deliveryDistance string [note:'Value in Km']
+      seriesID string
+      comments string
+      exchanged boolean
+      SMS array
+      reschedules array
+      numberReschedules number
+      recipientComments string
+}
+
+Table documents.exchange {
+      exchangeID string
+      id string
+      deliveryID string
+      totalDimensions map [default:'{H:"",L:"",W:""}']
+      rider map [default:'{name:"",lastName:"",number:""}']
+      totalWeight number
+      contact map [default: '{available:"" contactID:"",email:"",name:"",number:""}']
+      totalPrice number
+      financialStatus string
+      createdAt string
+      cancelledAt string
+      cancelReason string
+      assignedWarehouse string
+      updatedAt string
+      fulfillmentStatus string [default: 'open']
+      lineItems arrayOfMaps [default:'[
+        { id: deliveryID.generate(), quantity: "", sku: "", skuInt: "", description: ""},
+      ]']
+      client map [default: '{clientID:"" name:""}']
+      deliveryAt string
+      recipient map [default: '{name:"",recipientID:""}']
+      availableWarehouses array
+      shippingAddress map [default:'{address:"",city:"",country:"", postalCode}']
+      expectedTime string
+      suggestedTimeOut string
+      deliveryDistance string
+      comments string
+}
+
+Table documents.recipient {
+  recipientID string [pk, default: '${client.clientID}-${name}-${id}']
+  availableWarehouses array
+  client map [default: '{clientID:"" name:""}']
+  contacts arrayOfMaps [ref: < maps.contact.contactID] 
+  id string
+  name string
+  shippingAddress map [ref: - maps.shippingAddress.address]
+  updatedAt string
+}
+
+Table documents.reschedule {
+  rescheduleID string [pk, default: '${client.clientID}-${to}-{createdAt}-${id}']
+  createdAt string [default: `new Date().toLocaleString("sv", { timeZone: "Europe/Berlin" })`]
+  deliveryID string
+  triggerEvent string
+  id string
+  recipientComments string
+  deliveryAt string
+}
+
+Table documents.user {
+  userID string
+}
+
+Table documents.rider {
+  riderID string [pk, default: '${name} ${lastName}-${id}']
+  id string [note: 'Auto-generated via orderd-id package, can be used to calculate createdAt value'] 
+  name string
+  lastName string
+  number string [note: 'Hat to include country code regex: (^[\+][(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4,6}$)']
+  createdAt string [default: `new Date().toLocaleString("sv", { timeZone: "Europe/Berlin" })`]
+  updatedAt string [note: 'Update this value when documents or subcollections are updated with new Date().toLocaleString("sv", { timeZone: "Europe/Berlin" })'] 
+  updatedBy string [default: `user.email`]
+  createdBy string 
+  orders collection [note: 'All documents in this collections have to be updated twice, once in the clients collections and once again in the main collections ']
+  returns collection [note: 'All documents in this collections have to be updated twice, once in the clients collections and once again in the main collections ']
+  exchanges collection [note: 'All documents in this collections have to be updated twice, once in the clients collections and once again in the main collections ']
+  kpis collection [note: 'All documents in this collections have to be updated twice, once in the clients collections and once again in the main collections ']
+}
+
+Table documents.warehouse {
+  warehouseID string [pk, default: '${id} => When attempted to add a new warehouse, notify the user when client is already in the db and update documents if it already exists']
+  address string [note: '${StreetName Number}, ${postalCode} ${city}, ${country}']
+  city string
+  country string [default: 'Germany']
+  countryCode string [default: 'DE']
+  deliversTo array [note: 'Input field is a string separated coma which is transformed into an array']
+  postalCode string [note: 'Should be present in deliversTo']
+  province string
+  createdAt string [default: `new Date().toLocaleString("sv", { timeZone: "Europe/Berlin" })`]
+  updatedAt string [note: 'Update this value when documents is updated with new Date().toLocaleString("sv", { timeZone: "Europe/Berlin" })'] 
+  updatedBy string [default: `user.email`]
+}
+
+// Maps =>>
+
+Table maps.contact {
+  contactID string [pk, default: '${clientID}-{name}-{id}']
+  available boolean [default: true]
+  email string [note: 'Always valid email']
+  name string [note: 'Notify user when contact with name is already present, update or create new contact as instructed']
+  number string [note: 'Always valid number with country code present']
+}
+
+Table maps.lineItem{
+  inventoryID string [pk, default: '${client.clientID}-${skuInt}-{id}']
+  id string [note: 'Auto-generated via orderd-id package, can be used to calculate createdAt value'] 
+  quantity number
+  sku string
+  skuInt string
+  description string
+  client map
+}
+
+Table maps.client {
+  clientID string [pk, default: '${name}-{id}'] 
+  name string 
+}
+
+Table maps.recipient {
+  recipientID string [pk, default: '${client.clientID}-${name}-${id}']
+  name string 
+}
+
+Table maps.shippingAddress {
+  address string [note: '${StreetName Number}, ${postalCode} ${city}, ${country}']
+  city string
+  country string
+  postalCode string
+}
+
+Table maps.rider {
+  riderID string [pk, default: '${name} ${lastName}-${id}']
+  name string
+  lastName string
+  number string
+}
+
+
+

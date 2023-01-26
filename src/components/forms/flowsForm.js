@@ -11,7 +11,7 @@ const orderid = require('order-id')('key');
 
 
 export function FlowsForm({ visible, handleVisibility, direction, edit ,flow}) {
-  const { dropDownClients, dropDownInventory, dropDownWarehouses, dropDownContacts } = UserAuth();
+  const { dropDownClients, dropDownInventory, dropDownWarehouses, dropDownContacts, user } = UserAuth();
   const [visibleFrequencyField, setVisibleFrequencyField] = useState(true);
   const [visibleTimeField, setVisibleTimeField] = useState(true);
   const [disabled, setDisabled] = useState(false);
@@ -29,10 +29,13 @@ export function FlowsForm({ visible, handleVisibility, direction, edit ,flow}) {
       totalPrice: 0,
       financialStatus: "",
       createdAt: "",
+      createdBy: "",
       cancelledAt: "",
+      cancelledBy: "",
       cancelReason: "",
       assignedWarehouse: "",
       updatedAt: "",
+      updatedBy:"",
       fulfillmentStatus: 'open',
       lineItems: [
         { id: orderid.generate(), quantity: "", sku: "", skuInt: "", description: "", inventoryID: "" },
@@ -41,11 +44,13 @@ export function FlowsForm({ visible, handleVisibility, direction, edit ,flow}) {
       client: {name:"",clientID:""},
       invoiceStamp: "",
       deliveryAt: "",
+      recipient:"",
       tos: "",
       frequency: "",
       seriesID: "",
       direction: direction,
-      comments: ""
+      comments: "",
+      sms: []
     }
   ]);
   
@@ -71,24 +76,34 @@ export function FlowsForm({ visible, handleVisibility, direction, edit ,flow}) {
 
   async function handleSubmit(editSeries){
     if (checkEmptyValuesFlow(inputFieldsGlobal[0])) {
+      console.log(inputFieldsGlobal[0])
       setAlertVisible(false)
       handleVisibility(false)
       if(editSeries) deleteSeries(flow)
       setInputFieldsGlobal(updateLineItemStats(inputFieldsGlobal[0].lineItems,inputFieldsGlobal[0]))
       inputFieldsGlobal[0].updatedAt = new Date().toLocaleString("sv", { timeZone: "Europe/Berlin" })
-      if(inputFieldsGlobal[0].tos === "Jour Fix" || !edit || (edit && editSeries)) inputFieldsGlobal[0].createdAt = new Date().toLocaleString("sv", { timeZone: "Europe/Berlin" })
+      inputFieldsGlobal[0].updatedBy = user.email
+      if(inputFieldsGlobal[0].tos === "Jour Fix" || !edit || (edit && editSeries)) {
+        inputFieldsGlobal[0].createdAt = new Date().toLocaleString("sv", { timeZone: "Europe/Berlin" })
+        inputFieldsGlobal[0].createdBy = user.email
+      }
       if (inputFieldsGlobal[0].tos !== "Jour Fix") {
-        inputFieldsGlobal[0].seriesID = null
-        if(inputFieldsGlobal[0].tos === "Jour Fix" || !edit || (edit && editSeries)) inputFieldsGlobal[0].id = orderid.generate()
+        inputFieldsGlobal[0].seriesID = ""
+        if(!edit || (edit && editSeries)) inputFieldsGlobal[0].id = orderid.generate()
         if(inputFieldsGlobal[0].tos === "Instant") inputFieldsGlobal[0].deliveryAt = new Date().toLocaleString("sv", { timeZone: "Europe/Berlin" });
         if (inputFieldsGlobal[0].direction === "outgoing") {
-          if(inputFieldsGlobal[0].tos === "Jour Fix" || !edit || (edit && editSeries)) inputFieldsGlobal[0].flowID = `WM-O-${inputFieldsGlobal[0].client.clientID}-${inputFieldsGlobal[0].assignedWarehouse}-${inputFieldsGlobal[0].id}`
+          if(!edit || (edit && editSeries)) inputFieldsGlobal[0].flowID = `WM-O-${inputFieldsGlobal[0].client.clientID}-${inputFieldsGlobal[0].assignedWarehouse}-${inputFieldsGlobal[0].id}`
           await setDoc(doc(db, "flows", inputFieldsGlobal[0].flowID), inputFieldsGlobal[0]);
+          await setDoc(doc(db, "contacts", `${inputFieldsGlobal[0].contact.contactID}/flows/${inputFieldsGlobal[0].flowID}`), inputFieldsGlobal[0])
           await setDoc(doc(db, "clients", `${inputFieldsGlobal[0].client.clientID}/flows/${inputFieldsGlobal[0].flowID}`), inputFieldsGlobal[0])
+          await setDoc(doc(db, "clients", `${inputFieldsGlobal[0].client.clientID}/contacts/${inputFieldsGlobal[0].contact.contactID}/flows/${inputFieldsGlobal[0].flowID}`), inputFieldsGlobal[0])
+
         }
         else if (inputFieldsGlobal[0].direction  === "incoming") {
-          if(inputFieldsGlobal[0].tos === "Jour Fix" || !edit || (edit && editSeries)) inputFieldsGlobal[0].flowID = `WM-I-${inputFieldsGlobal[0].client.clientID}-${inputFieldsGlobal[0].assignedWarehouse}-${inputFieldsGlobal[0].id}`
+          if(!edit || (edit && editSeries)) inputFieldsGlobal[0].flowID = `WM-I-${inputFieldsGlobal[0].client.clientID}-${inputFieldsGlobal[0].assignedWarehouse}-${inputFieldsGlobal[0].id}`
           await setDoc(doc(db, "flows", inputFieldsGlobal[0].flowID), inputFieldsGlobal[0]);
+          await setDoc(doc(db, "contacts", `${inputFieldsGlobal[0].contact.contactID}/flows/${inputFieldsGlobal[0].flowID}`), inputFieldsGlobal[0])
+          await setDoc(doc(db, "clients", `${inputFieldsGlobal[0].client.clientID}/contacts/${inputFieldsGlobal[0].contact.contactID}/flows/${inputFieldsGlobal[0].flowID}`), inputFieldsGlobal[0])
           await setDoc(doc(db, "clients", `${inputFieldsGlobal[0].client.clientID}/flows/${inputFieldsGlobal[0].flowID}`), inputFieldsGlobal[0])
         }
       }
@@ -147,22 +162,29 @@ export function FlowsForm({ visible, handleVisibility, direction, edit ,flow}) {
             send = true
           }
           if (send) {
-            if(inputFieldsGlobal[0].tos === "Jour Fix" || !edit || (edit && editSeries)) inputFieldsGlobal[0].seriesID = seriesID
-            if(inputFieldsGlobal[0].tos === "Jour Fix" || !edit || (edit && editSeries)) inputFieldsGlobal[0].id = orderid.generate()
+            if(!edit || (edit && editSeries)) inputFieldsGlobal[0].seriesID = seriesID
+            if(!edit || (edit && editSeries)) inputFieldsGlobal[0].id = orderid.generate()
             if (inputFieldsGlobal[0].direction  === "outgoing") {
-              if(inputFieldsGlobal[0].tos === "Jour Fix" || !edit || (edit && editSeries)) inputFieldsGlobal[0].flowID = `WM-O-${inputFieldsGlobal[0].client.clientID}-${inputFieldsGlobal[0].assignedWarehouse}-${inputFieldsGlobal[0].id}`
+              inputFieldsGlobal[0].flowID = `WM-O-${inputFieldsGlobal[0].client.clientID}-${inputFieldsGlobal[0].assignedWarehouse}-${inputFieldsGlobal[0].id}`
               await setDoc(doc(db, "flows", inputFieldsGlobal[0].flowID), inputFieldsGlobal[0]);
               await setDoc(doc(db, "clients", `${inputFieldsGlobal[0].client.clientID}/flows/${inputFieldsGlobal[0].flowID}`), inputFieldsGlobal[0])
+              await setDoc(doc(db, "clients", `${inputFieldsGlobal[0].client.clientID}/contacts/${inputFieldsGlobal[0].contact.contactID}/flows/${inputFieldsGlobal[0].flowID}`), inputFieldsGlobal[0])
+              await setDoc(doc(db, "contacts", `${inputFieldsGlobal[0].contact.contactID}/flows/${inputFieldsGlobal[0].flowID}`), inputFieldsGlobal[0])
             }
             else if (inputFieldsGlobal[0].direction  === "incoming") {
-              if(inputFieldsGlobal[0].tos === "Jour Fix" || !edit || (edit && editSeries)) inputFieldsGlobal[0].flowID = `WM-I-${inputFieldsGlobal[0].client.clientID}-${inputFieldsGlobal[0].assignedWarehouse}-${inputFieldsGlobal[0].id}`
+              inputFieldsGlobal[0].flowID = `WM-I-${inputFieldsGlobal[0].client.clientID}-${inputFieldsGlobal[0].assignedWarehouse}-${inputFieldsGlobal[0].id}`
               await setDoc(doc(db, "flows", inputFieldsGlobal[0].flowID), inputFieldsGlobal[0]);
               await setDoc(doc(db, "clients", `${inputFieldsGlobal[0].client.clientID}/flows/${inputFieldsGlobal[0].flowID}`), inputFieldsGlobal[0])
+              await setDoc(doc(db, "contacts", `${inputFieldsGlobal[0].contact.contactID}/flows/${inputFieldsGlobal[0].flowID}`), inputFieldsGlobal[0])
+              await setDoc(doc(db, "clients", `${inputFieldsGlobal[0].client.clientID}/contacts/${inputFieldsGlobal[0].contact.contactID}/flows/${inputFieldsGlobal[0].flowID}`), inputFieldsGlobal[0])
             }
             send = false
           }
-        }
+        } 
       }
+      await setDoc(doc(db, "clients", `${inputFieldsGlobal[0].client.clientID}`), { updatedAt: new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"}), updatedBy: user.email }, { merge: true }); 
+      await setDoc(doc(db, "clients", `${inputFieldsGlobal[0].client.clientID}/contacts/${inputFieldsGlobal[0].contact.contactID}`), { updatedAt: new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"}), updatedBy: user.email }, { merge: true }); 
+      await setDoc(doc(db, "contacts", `${inputFieldsGlobal[0].contact.contactID}`), { updatedAt: new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"}), updatedBy: user.email }, { merge: true });
       clearDeliveryForm()
     }
     else {
@@ -183,23 +205,28 @@ export function FlowsForm({ visible, handleVisibility, direction, edit ,flow}) {
         totalPrice: 0,
         financialStatus: "",
         createdAt: "",
+        createdBy: "",
         cancelledAt: "",
+        cancelledBy: "",
         cancelReason: "",
         assignedWarehouse: "",
         updatedAt: "",
+        updatedBy:"",
         fulfillmentStatus: 'open',
         lineItems: [
-          { id: orderid.generate(), quantity: "", sku: "", skuInt: "", description: "" , inventoryID: "" },
+          { id: orderid.generate(), quantity: "", sku: "", skuInt: "", description: "", inventoryID: "" },
         ],
         flowID: "",
         client: {name:"",clientID:""},
         invoiceStamp: "",
         deliveryAt: "",
+        recipient:"",
         tos: "",
         frequency: "",
         seriesID: "",
         direction: direction,
-        comments: ""
+        comments: "",
+        sms: []
       },
     ])
     setVisibleTimeField(true)
@@ -221,17 +248,21 @@ export function FlowsForm({ visible, handleVisibility, direction, edit ,flow}) {
   const checkEmptyValuesFlow = (item) => {
     if (
       item.client.clientID.length === 0 ||
+      item.client.name.length === 0 ||
       item.invoiceStamp.length === 0 ||
       item.tos.length === 0 ||
       item.assignedWarehouse.length === 0 ||
-      item.contact.name === 0 ||
-      item.contact.number === 0 ||
-      item.contact.email === 0 
-    ) {
+      item.contact.name.length  === 0 ||
+      item.contact.number.length  === 0 ||
+      item.contact.email.length  === 0 ||
+      item.deliveryAt.length  === 0 ||
+      item.lineItems[0].sku.length  === 0 ||
+      item.lineItems[0].quantity.length  === 0 
+      ) {
       return false
     }
     else {
-      if (item.tos.length === 'Jour Fix' & (
+      if (item.tos === 'Jour Fix' & (
         item.contractLength.length === 0 ||
         item.daysOfWeek.length === 0 ||
         item.frequency.length === 0 )
@@ -287,14 +318,14 @@ export function FlowsForm({ visible, handleVisibility, direction, edit ,flow}) {
         <div className="p-5 m-10 max-h-xl bg-white rounded-lg border border-gray-200 shadow-md dark:bg-gray-800 dark:border-gray-700">
           {alertVisible &&
             <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-6" role="alert">
-              <strong class="font-bold">🧙‍♂️ Hello traveler...</strong>
-              <span class="block sm:inline">Double check that all the fields are not empty</span>
-              <span class="absolute top-0 bottom-0 right-0 px-4 py-3">
-                <svg class="fill-current h-6 w-6 text-red-500" role="button" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><title>Close</title><path d="M14.348 14.849a1.2 1.2 0 0 1-1.697 0L10 11.819l-2.651 3.029a1.2 1.2 0 1 1-1.697-1.697l2.758-3.15-2.759-3.152a1.2 1.2 0 1 1 1.697-1.697L10 8.183l2.651-3.031a1.2 1.2 0 1 1 1.697 1.697l-2.758 3.152 2.758 3.15a1.2 1.2 0 0 1 0 1.698z" /></svg>
-              </span>
-            </div>
+            <strong class="block font-bold">🧙‍♂️ Hello traveler... Double check that:</strong>
+            <span class="block">- All the fields are not empty.</span>
+            <span class="absolute top-0 bottom-0 right-0 px-4 py-3">
+              <svg onClick={() => setAlertVisible(false)} class="fill-current h-6 w-6 text-red-500" role="button" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><title>Close</title><path d="M14.348 14.849a1.2 1.2 0 0 1-1.697 0L10 11.819l-2.651 3.029a1.2 1.2 0 1 1-1.697-1.697l2.758-3.15-2.759-3.152a1.2 1.2 0 1 1 1.697-1.697L10 8.183l2.651-3.031a1.2 1.2 0 1 1 1.697 1.697l-2.758 3.152 2.758 3.15a1.2 1.2 0 0 1 0 1.698z" /></svg>
+            </span>
+          </div>
           }
-          <form>
+          <form >
             <div class="grid gap-6 mb-6 md:grid-cols-4">
             {!disabled &&
               <div>
@@ -456,13 +487,13 @@ export function FlowsForm({ visible, handleVisibility, direction, edit ,flow}) {
               </div>
             ))}
             {!edit &&
-            <button type="submit" onClick={() => {handleSubmit()}}class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">Submit</button>
+            <button type="button" onClick={() => {handleSubmit()}}class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">Submit</button>
             }
             {edit &&
-            <button type="submit" onClick={() => {handleSubmit(false)}}  class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">Edit</button>
+            <button type="button" onClick={() => {handleSubmit(false)}}  class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">Edit</button>
             }  
             {(edit && flow.seriesID && flow.seriesID.length > 0)  &&
-            <button type="submit" onClick={() => {handleSubmit(true)}} class="ml-5 text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">Edit Series</button>
+            <button type="button" onClick={() => {handleSubmit(true)}} class="ml-5 text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">Edit Series</button>
             }           
             <button type="button" onClick={() => {clearDeliveryForm()}} class="ml-5 text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-red-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">Cancel</button>
           </form>

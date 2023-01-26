@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import Table from '../components/table';
 import MessageForm from '../components/forms/messageForm';
 import React from 'react';
-import { DateDeliveryField,StateDeliveryField,ContentDeliveryField, DateField, DailyReminderStatus} from '../components/tableCells';
+import {StateDeliveryField,ContentDeliveryField, DateField, DailyReminderStatus} from '../components/tableCells';
 
 
 
@@ -17,7 +17,7 @@ export function Messages() {
   useEffect(() => {
     const colRef1 = collection(db, "clients" )
     const colRef = collection(db, "messages" )
-    const colRef2 = collection(db, "dailyReminders" )
+    const colRef2 = collection(db, "reminders" )
     let isMounted = true;
     //real time update
     onSnapshot(colRef, (snapshot) => {
@@ -84,12 +84,11 @@ export function Messages() {
       Cell: ContentDeliveryField
     },
     {
-        Header: "Delivery Date",
-        accessor: "delivery.endTime",
-        id: "delivery_date",
-        Cell: DateDeliveryField,
-        sortType: compareTimeStamp
-        
+      Header: "Delivery Date",
+      accessor: "createdAt",
+      id: "createdAt",
+      Cell: DateField,
+      sortType: compareTimeStamp
     },
     {
         Header: "Delivery State",

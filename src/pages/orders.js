@@ -5,51 +5,13 @@ import { useEffect, useState } from 'react';
 import { DateField, StatusPill, ShippingField, ItemsField, StatusPillAction, PostalCodes } from '../components/tableCells';
 import { DeliveryForm } from '../components/forms/deliveryForm';
 import React from 'react';
-import { UserAuth } from '../context/authContex';
 export function Orders() {
   const [data, setData] = useState([]);
   const [visible, setVisible] = useState(false);
-  const {gapi} = UserAuth();
+  
 
 
-  var event = {
-    summary: "Hello World",
-    location: "",
-    start: {
-      dateTime: "2023-01-18T09:00:00-07:00",
-      timeZone: "Europe/Berlin",
-    },
-    end: {
-      dateTime: "2023-01-18T17:00:00-07:00",
-      timeZone: "Europe/Berlin",
-    },
-    recurrence: ["RRULE:FREQ=DAILY;COUNT=2"],
-    attendees: [],
-    reminders: {
-      useDefault: false,
-      overrides: [
-        { method: "email", minutes: 24 * 60 },
-        { method: "popup", minutes: 10 },
-      ],
-    },
-  };
-  const publishTheCalenderEvent = (event) => {
-    try {
-        gapi.client.load('calendar', 'v3', () => {
-            var request = gapi.client.calendar.events.insert({
-                'calendarId': 'primary',
-                'resource': event
-            });
-        
-            request.execute(function(event) {
-                console.log('Event created: ' + event.htmlLink);
-            });
-        })
-          
-    } catch (error) {
-        console.log(error)
-    }
-  }
+  
 
   
   useEffect(() => {
@@ -63,6 +25,7 @@ export function Orders() {
           snapshot.docs.forEach((doc) => {
             setData((prev) => [ doc.data() , ...prev])
           })
+
         }
     })  
     return () => {
@@ -158,7 +121,6 @@ export function Orders() {
   const handleVisibility = visibility => {
     // 👇️ take parameter passed from Child component
     setVisible(visibility);
-    publishTheCalenderEvent(event)
   };
   const AddButton = () => {
     return(

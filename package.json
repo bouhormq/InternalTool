@@ -19,6 +19,7 @@
     "react-scripts": "^4.0.1",
     "react-select": "^5.7.0",
     "react-table": "^7.8.0",
+    "recur-date-based": "^1.1.1",
     "web-vitals": "^2.1.4",
     "xlsx": "^0.18.5"
   },

@@ -8,10 +8,11 @@ import { doc, getDoc } from 'firebase/firestore'
 import db from '../firebase'
 import axios from 'axios'
 import { useState } from 'react'
-const orderid = require('order-id')('key');
 import { setDoc } from 'firebase/firestore'
 import { collection, onSnapshot, query, orderBy,where } from 'firebase/firestore';
-import ClientForm from './clientForm'
+import {ClientForm} from './clientForm'
+const orderid = require('order-id')('key');
+
 
 
 

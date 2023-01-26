@@ -1,9 +1,14 @@
 import { collection, getDocs,query, setDoc, doc, getDoc, deleteDoc, where } from 'firebase/firestore';
 import { handleOrderFlow } from '../tableCells';
+import { UserAuth } from '../../context/authContex';
 import db from '../../firebase'
 const orderid = require('order-id')('key');
 
+export function addMinutes(date, minutes) {
+  date.setMinutes(date.getMinutes() + minutes);
 
+  return date;
+}
 
 export const tosOptions = [
   {value:"Jour Fix",label:"Jour Fix"},
@@ -13,7 +18,12 @@ export const tosOptions = [
 export const frequencyOptions = [
   {value:"Weekly",label:"Weekly"},
   {value:"Bi-Weekly",label:"Bi-Weekly"},
-  {value:"Montly",label:"Montly"}
+  {value:"Monthly",label:"Monthly"}
+ ]
+
+ export const roleOptions = [
+  {value:"Property Manager",label:"Property Manager"},
+  {value:"Other",label:"Other"}
  ]
 
 export const contractLengthOptions = [
@@ -34,6 +44,13 @@ export const contractLengthOptions = [
   {value:"Sobald unser Personal eine Nachlieferung zulässt, werden wir Ihnen per SMS einen Link schicken, mit dem Sie das gewünschte Datum und die gewünschte Zeit für eine Nachlieferung wählen können. Es entstehen Ihnen natürlich keine weiteren Kosten – wir entschuldigen uns für die Unannehmlichkeiten!",label:"Staff shortage", labelGerman:"Fehlendes Personal"},
   {value:"Leider haben wir gerade mit Force-Mayeur-Schwierigkeiten zu kämpfen. Wir werden Sie kontaktieren, sobald wir wieder einsatzfähig sind und entschuldigen uns für die entstandenen Unannehmlichkeiten!",label:"Force Mayeur", labelGerman:"Force Mayeur"},
  ]
+
+ export const dropDownCancelOptionsFlow = [
+  {value:"",label:"Delivery staff didn't come"},
+  {value:"",label:"Staff shortage"},
+ ]
+
+ 
 
  export function updateLineItemStats(lineItems,inputFieldsGlobal){
   var  auxInputFieldsGlobal = inputFieldsGlobal
@@ -173,9 +190,9 @@ export const handleRemoveFields = async (id,inputFields) => {
 
     export async function deleteSeries(flow){
       var q = null
-      if(flow.deliveryID && flow.type === "Order") q = query(collection(db, "orders"), where("seriesID", "==", flow.seriesID));
-      else if(flow.deliveryID && flow.type === "Return") q = query(collection(db, "returns"), where("seriesID", "==", flow.seriesID));
-      else q = query(collection(db, "flows"), where("seriesID", "==", flow.seriesID));
+      if(flow.deliveryID && flow.type === "Order") q = query(collection(db, "orders"), where("seriesID", "==", flow.seriesID), where('fulfillmentStatus', 'in', ["open","inProgress"]));
+      else if(flow.deliveryID && flow.type === "Return") q = query(collection(db, "returns"), where("seriesID", "==", flow.seriesID), where('fulfillmentStatus', 'in', ["open","inProgress"]));
+      else q = query(collection(db, "flows"), where("seriesID", "==", flow.seriesID), where('fulfillmentStatus', 'in', ["open","inProgress"]));
       const querySnapshot = await getDocs(q);
       var flows = [] 
       querySnapshot.forEach(async (doc) => {
@@ -217,6 +234,8 @@ export const handleRemoveFields = async (id,inputFields) => {
           await deleteDoc(doc(db, "clients", `${element.client.clientID}/orders/${element.deliveryID}`));
           await deleteDoc(doc(db, "flows", `D-O-${element.deliveryID}`));
           await deleteDoc(doc(db, "clients", `${element.client.clientID}/flows/D-O-${element.deliveryID}`));
+          await deleteDoc(doc(db, "clients", `${element.client.clientID}/contacts/${element.contact.contactID}/orders/${element.deliveryID}`));
+          await deleteDoc(doc(db, "contacts", `${element.contact.contactID}/orders/${element.deliveryID}`));
         })
       }
       else if(flow.deliveryID && flow.type === "Return") {
@@ -225,12 +244,16 @@ export const handleRemoveFields = async (id,inputFields) => {
           await deleteDoc(doc(db, "clients", `${element.client.clientID}/returns/${element.deliveryID}`));
           await deleteDoc(doc(db, "flows", `D-R-${element.deliveryID}`));
           await deleteDoc(doc(db, "clients", `${element.client.clientID}/flows/D-R-${element.deliveryID}`));
+          await deleteDoc(doc(db, "clients", `${element.client.clientID}/contacts/${element.contact.contactID}/returns/${element.deliveryID}`));
+          await deleteDoc(doc(db, "contacts", `${element.contact.contactID}/returns/${element.deliveryID}`));
         })
       }
       else{
         flows.forEach(async element => {
           await deleteDoc(doc(db, "flows", element.flowID));
           await deleteDoc(doc(db, "clients", `${element.client.clientID}/flows/${element.flowID}`));
+          await deleteDoc(doc(db, "clients", `${element.client.clientID}/contacts/${element.contact.contactID}/flows/${element.flowID}`));
+          await deleteDoc(doc(db, "contacts", `${element.contact.contactID}/flows/${element.flowID}`));
         })
       }
     };
@@ -287,42 +310,52 @@ export const handleRemoveFields = async (id,inputFields) => {
     return [auxInputFields]
 }
 
-export async function deliveryToFlow(delivery,exchange){
+export async function deliveryToFlow(delivery,exchange,user){
+  var flowID = ""
   if(delivery.type === "Order"){
+    flowID = `D-O-${delivery.deliveryID}`
     let flow = {
-        id: delivery.id,
-        type: "Order",
-        totalDimensions: delivery.totalDimensions,
-        daysOfWeek: delivery.daysOfWeek,
-        contractLength: delivery.contractLength,
-        totalWeight: delivery.totalWeight,
-        contact: delivery.contact,
-        totalPrice: delivery.totalPrice,
-        financialStatus: delivery.financialStatus,
-        createdAt: delivery.createdAt,
-        cancelledAt: delivery.cancelledAt,
-        cancelReason: delivery.cancelReason,
-        assignedWarehouse: delivery.assignedWarehouse,
-        updatedAt: delivery.updatedAt,
-        fulfillmentStatus: delivery.fulfillmentStatus,
-        lineItems: delivery.lineItems,
-        flowID: `D-O-${delivery.deliveryID}`,
-        client: delivery.client,
-        invoiceStamp: delivery.invoiceStamp,
-        deliveryAt: delivery.deliveryAt,
-        tos: delivery.tos,
-        frequency: delivery.frequency,
-        seriesID: delivery.seriesID,
-        direction: "outgoing",
-        comments: delivery.comments,
+      id: delivery.id,
+      type: "Order",
+      totalDimensions: delivery.totalDimensions,
+      daysOfWeek: delivery.daysOfWeek,
+      contractLength: delivery.contractLength,
+      totalWeight: delivery.totalWeight,
+      contact: delivery.contact,
+      totalPrice: delivery.totalPrice,
+      financialStatus: delivery.financialStatus,
+      createdAt: new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"}),
+      createdBy: user.email,
+      cancelledAt: new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"}),
+      cancelledBy: delivery.cancelledBy,
+      cancelReason: delivery.cancelReason,
+      assignedWarehouse: delivery.assignedWarehouse,
+      updatedAt: new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"}),
+      updatedBy:new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"}),
+      fulfillmentStatus: delivery.fulfillmentStatus,
+      lineItems: delivery.lineItems,
+      flowID: `D-O-${delivery.deliveryID}`,
+      deliveryID: delivery.deliveryID,
+      client: delivery.client,
+      invoiceStamp: delivery.invoiceStamp,
+      deliveryAt: delivery.deliveryAt,
+      recipient:delivery.recipient,
+      tos: delivery.tos,
+      frequency: delivery.frequency,
+      seriesID: delivery.seriesID,
+      direction: "outgoing",
+      comments: delivery.comments,
+      sms: delivery.sms,
     }
-    await setDoc(doc(db, "orders", delivery.deliveryID), delivery);
-    await setDoc(doc(db, "clients", `${delivery.client.clientID}/orders/${delivery.deliveryID}`), delivery)
-    if(delivery.fulfillmentStatus === "success") handleOrderFlow(delivery,"outgoing")
+    console.log(flow,delivery)
+    if("deliveryToFlow",delivery.fulfillmentStatus === "success") handleOrderFlow(delivery,"outgoing",user)
     await setDoc(doc(db, "flows", flow.flowID), flow);
-    await setDoc(doc(db, "clients", `${flow.client.clientID}/flows/${flow.flowID}`), flow);
+    await setDoc(doc(db, "clients", `${flow.client.clientID}/flows/${flow.flowID}`), flow)
+    await setDoc(doc(db, "clients", `${flow.client.clientID}/contacts/${flow.contact.contactID}/flows/${flow.flowID}`), flow)
+    await setDoc(doc(db, "contacts", `${flow.contact.contactID}/flows/${flow.flowID}`), flow)
   }
   else if(delivery.type === "Return"){
+    flowID = `D-R-${delivery.deliveryID}`
     let flow = {
       id: delivery.id,
       type: "Return",
@@ -333,62 +366,71 @@ export async function deliveryToFlow(delivery,exchange){
       contact: delivery.contact,
       totalPrice: delivery.totalPrice,
       financialStatus: delivery.financialStatus,
-      createdAt: delivery.createdAt,
-      cancelledAt: delivery.cancelledAt,
+      createdAt: new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"}),
+      createdBy: user.email,
+      cancelledAt: new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"}),
+      cancelledBy: delivery.cancelledBy,
       cancelReason: delivery.cancelReason,
       assignedWarehouse: delivery.assignedWarehouse,
-      updatedAt: delivery.updatedAt,
+      updatedAt: new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"}),
+      updatedBy:new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"}),
       fulfillmentStatus: delivery.fulfillmentStatus,
       lineItems: delivery.lineItems,
       flowID: `D-R-${delivery.deliveryID}`,
+      deliveryID: delivery.deliveryID,
       client: delivery.client,
       invoiceStamp: delivery.invoiceStamp,
       deliveryAt: delivery.deliveryAt,
+      recipient:delivery.recipient,
       tos: delivery.tos,
       frequency: delivery.frequency,
       seriesID: delivery.seriesID,
       direction: "incoming",
       comments: delivery.comments,
-  }
-    await setDoc(doc(db, "returns", delivery.deliveryID), delivery);
-    await setDoc(doc(db, "clients", `${delivery.client.clientID}/return/${delivery.deliveryID}`), delivery)
-    if(delivery.fulfillmentStatus === "success") handleOrderFlow(delivery,"incomming")
+      sms: delivery.sms,
+    }
+    if(delivery.fulfillmentStatus === "success") handleOrderFlow(delivery,"incomming",user)
     await setDoc(doc(db, "flows", flow.flowID), flow);
-    await setDoc(doc(db, "clients", `${flow.client.clientID}/flows/${flow.flowID}`), flow);
+    await setDoc(doc(db, "clients", `${flow.client.clientID}/flows/${flow.flowID}`), flow)
+    await setDoc(doc(db, "clients", `${flow.client.clientID}/contacts/${flow.contact.contactID}/flows/${flow.flowID}`), flow)
+    await setDoc(doc(db, "contacts", `${flow.contact.contactID}/flows/${flow.flowID}`), flow)
   }
   else if(exchange){
+    flowID = `D-E-${delivery.deliveryID}`
     let flow = {
       id: delivery.id,
       type: "Exchange",
       totalDimensions: delivery.totalDimensions,
-      daysOfWeek: "",
-      contractLength: "",
       totalWeight: delivery.totalWeight,
       contact: delivery.contact,
       totalPrice: delivery.totalPrice,
       financialStatus: delivery.financialStatus,
-      createdAt: delivery.createdAt,
-      cancelledAt: "",
-      cancelReason: "",
-      assignedWarehouse: delivery.fulfillmentStatus,
-      updatedAt: new Date().toLocaleString("sv", { timeZone: "Europe/Berlin" }),
+      createdAt: new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"}),
+      createdBy: user.email,
+      assignedWarehouse: delivery.assignedWarehouse,
+      updatedAt: new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"}),
+      updatedBy:new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"}),
       fulfillmentStatus: delivery.fulfillmentStatus,
       lineItems: delivery.lineItems,
-      flowID: `E-${delivery.exchangeID}`,
+      flowID: flowID,
+      deliveryID: delivery.deliveryID,
       client: delivery.client,
       invoiceStamp: delivery.invoiceStamp,
       deliveryAt: delivery.deliveryAt,
-      tos: "",
-      frequency: "",
-      seriesID: "",
+      recipient:delivery.recipient,
       direction: "incoming",
       comments: delivery.comments,
-  }
-    handleOrderFlow(delivery,"incoming")
+      sms: delivery.sms,
+    }
+    handleOrderFlow(delivery,"incoming",user)
     await setDoc(doc(db, "flows", flow.flowID), flow);
-    await setDoc(doc(db, "clients", `${flow.client.clientID}/flows/${flow.flowID}`), flow);
+    await setDoc(doc(db, "clients", `${flow.client.clientID}/flows/${flow.flowID}`), flow)
+    await setDoc(doc(db, "clients", `${flow.client.clientID}/contacts/${flow.contact.contactID}/flows/${flow.flowID}`), flow)
+    await setDoc(doc(db, "contacts", `${flow.contact.contactID}/flows/${flow.flowID}`), flow)
   }
+  return flowID
 }
+
 
 export const handleSkuForm = async (event, id, name, inputFields) => {
   var auxInputFields = inputFields

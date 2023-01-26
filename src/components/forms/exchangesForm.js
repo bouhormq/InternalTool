@@ -10,84 +10,69 @@ const orderid = require('order-id')('key');
 
 
 export function ExchangeForm({visible,handleVisibility,delivery}) {
-  const {dropDownInventory} = UserAuth();
+  const {dropDownInventory,user} = UserAuth();
   const [alertVisible, setAlertVisible] = useState(false);
   const [inputFieldsGlobal, setInputFieldsGlobal] = useState([{ 
-  id: "",
-  totalDimensions:"",
-  rider:{name:"",lastName:"",number:""},
-  totalWeight: "",
-  contact:{name: "" ,number: "",email: "", contactID: "", available: ""},
-  totalPrice: "",
-  financialStatus:"",
-  createdAt:"",
-  assignedWarehouse: "",
-  fulfillmentStatus:'success', 
-  lineItems: [
-    { id: orderid.generate(), quantity: "", sku: "", skuInt: "", description: ""},
-  ],
-  deliveryID: "", 
-  exchangeID: "", 
-  client: {name:"",clientID:""},
-  deliveryAt: "", 
-  recipient: {name:"",recipientID:""},
-  availableWarehouses: [], 
-  shippingAddress: {city: "", zip: "", country:'Germany', address: ""}, 
-  expectedTime:"",
-  suggestedTimeOut:"",
-  deliveryDistance:"",
-  comments: "",
-  invoiceStamp: ""
-}
+    id: "",
+    type: "Exchange", 
+    totalDimensions:"",
+    rider:delivery.rider,
+    totalWeight: "",
+    contact:delivery.contact,
+    totalPrice: "",
+    financialStatus:"",
+    createdAt:"",
+    createdBy:"",
+    assignedWarehouse: delivery.assignedWarehouse,
+    fulfillmentStatus:'success', 
+    lineItems: [
+      { id: orderid.generate(), quantity: "", sku: "", skuInt: "", description: ""},
+    ],
+    deliveryID: delivery.deliveryID,
+    client: delivery.client,
+    invoiceStamp: "", 
+    deliveryAt: delivery.deliveryAt, 
+    recipient: delivery.recipient, 
+    availableWarehouses: delivery.availableWarehouses, 
+    shippingAddress: delivery.shippingAddress,  
+    timeline:delivery.timeline, 
+    expectedTime:delivery.expectedTime, 
+    suggestedTimeOut:delivery.suggestedTimeOut, 
+    deliveryDistance:delivery.deliveryDistance, 
+    comments: delivery.comments,
+    flowID: "",
+    sms: delivery.sms,
+
+  }
   ]);
 
-  useEffect(() => {
-      setInputFieldsGlobal([{ 
-        id: "",
-        totalDimensions:"",
-        rider: delivery.rider,
-        totalWeight: "",
-        contact:delivery.contact,
-        totalPrice: "",
-        financialStatus:delivery.financialStatus,
-        createdAt:"",
-        assignedWarehouse: delivery.assignedWarehouse,
-        fulfillmentStatus:'success', 
-        lineItems: [
-          { id: orderid.generate(), quantity: "", sku: "", skuInt: "", description: ""},
-        ],
-        deliveryID: delivery.deliveryID, 
-        exchangeID: delivery.deliveryID, 
-        client: delivery.client,
-        deliveryAt: "", 
-        recipient: delivery.recipient,
-        availableWarehouses: delivery.availableWarehouses, 
-        shippingAddress: delivery.shippingAddress, 
-        expectedTime:"",
-        suggestedTimeOut:"",
-        deliveryDistance:"",
-        comments: delivery.comments,
-        invoiceStamp: ""
-      }])
-  }, [visible])
   
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (true) { //checkEmptyValues
+    if (inputFieldsGlobal[0].lineItems[0].sku.length  !== 0 || inputFieldsGlobal[0].lineItems[0].quantity.length  !== 0 ) { 
       setAlertVisible(false)
       handleVisibility(false)
       setInputFieldsGlobal(updateLineItemStats(inputFieldsGlobal[0].lineItems,inputFieldsGlobal[0]))
       inputFieldsGlobal[0].createdAt = new Date().toLocaleString("sv", { timeZone: "Europe/Berlin" })
-      inputFieldsGlobal[0].id = orderid.generate()
-      inputFieldsGlobal[0].deliveryAt = new Date().toLocaleString("sv", { timeZone: "Europe/Berlin" });
+      inputFieldsGlobal[0].createdBy = user.email
       inputFieldsGlobal[0].invoiceStamp = new Date().toLocaleString("sv", { timeZone: "Europe/Berlin" })
-      await setDoc(doc(db, "exchanges", inputFieldsGlobal[0].exchangeID), inputFieldsGlobal[0]);
-      await setDoc(doc(db, "clients", `${inputFieldsGlobal[0].client.clientID}/exchanges/${inputFieldsGlobal[0].exchangeID}`), inputFieldsGlobal[0])
+      await setDoc(doc(db, "exchanges", inputFieldsGlobal[0].deliveryID), inputFieldsGlobal[0]);
+      await setDoc(doc(db, "clients", `${inputFieldsGlobal[0].client.clientID}/exchanges/${inputFieldsGlobal[0].deliveryID}`), inputFieldsGlobal[0])
+      await setDoc(doc(db, "contacts", `${inputFieldsGlobal[0].contact.contactID}/exchanges/${inputFieldsGlobal[0].deliveryID}`), inputFieldsGlobal[0])
+      await setDoc(doc(db, "clients", `${inputFieldsGlobal[0].client.clientID}/contacts/${inputFieldsGlobal[0].contact.contactID}/exchanges/${inputFieldsGlobal[0].deliveryID}`), inputFieldsGlobal[0])
+      await setDoc(doc(db, "clients", `${inputFieldsGlobal[0].client.clientID}`), { updatedAt: new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"}), updatedBy: user.email }, { merge: true }); 
+      await setDoc(doc(db, "clients", `${inputFieldsGlobal[0].client.clientID}/contacts/${inputFieldsGlobal[0].contact.contactID}`), { updatedAt: new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"}), updatedBy: user.email }, { merge: true }); 
+      await setDoc(doc(db, "contacts", `${inputFieldsGlobal[0].contact.contactID}`), { updatedAt: new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"}), updatedBy: user.email }, { merge: true });
       delivery.exchanged = true
-      await setDoc(doc(db, "orders", delivery.deliveryID), delivery);
+      await setDoc(doc(db, "orders", inputFieldsGlobal[0].deliveryID), delivery);
       await setDoc(doc(db, "clients", `${delivery.client.clientID}/orders/${delivery.deliveryID}`), delivery)
-      deliveryToFlow(inputFieldsGlobal[0],true)
+      await setDoc(doc(db, "contacts", `${delivery.contact.contactID}/orders/${delivery.deliveryID}`), delivery)
+      await setDoc(doc(db, "clients", `${delivery.client.clientID}/contacts/${delivery.contact.contactID}/orders/${delivery.deliveryID}`), delivery)
+      await setDoc(doc(db, "clients", `${delivery.client.clientID}`), { updatedAt: new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"}), updatedBy: user.email }, { merge: true }); 
+      await setDoc(doc(db, "clients", `${delivery.client.clientID}/contacts/${delivery.contact.contactID}`), { updatedAt: new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"}), updatedBy: user.email }, { merge: true }); 
+      await setDoc(doc(db, "contacts", `${delivery.contact.contactID}`), { updatedAt: new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"}), updatedBy: user.email }, { merge: true });
+      deliveryToFlow(inputFieldsGlobal[0],true,user)
       clearDeliveryForm()
     }
     else {
@@ -97,30 +82,38 @@ export function ExchangeForm({visible,handleVisibility,delivery}) {
 
   const clearDeliveryForm = () => {
     setInputFieldsGlobal([
-        { id: "",
+      { 
+        id: "",
+        type: "Exchange", 
         totalDimensions:"",
-        rider:{name:"",lastName:"",number:""},
+        rider:delivery.rider,
         totalWeight: "",
-        contact:{name: "" ,number: "",email: "", contactID: "", available: ""},
+        contact:delivery.contact,
         totalPrice: "",
         financialStatus:"",
         createdAt:"",
-        assignedWarehouse: "",
+        createdBy:"",
+        assignedWarehouse: delivery.assignedWarehouse,
         fulfillmentStatus:'success', 
         lineItems: [
           { id: orderid.generate(), quantity: "", sku: "", skuInt: "", description: ""},
         ],
-        deliveryID: "", 
+        deliveryID: delivery.deliveryID,
         exchangeID: "", 
-        client: {name:"",clientID:""},
-        deliveryAt: "", 
-        recipient: {name:"",recipientID:""},
-        availableWarehouses: [], 
-        shippingAddress: {city: "", zip: "", country:'Germany', address: ""}, 
-        expectedTime:"",
-        suggestedTimeOut:"",
-        deliveryDistance:"",
-        comments: "",
+        client: delivery.client,
+        invoiceStamp: "", 
+        deliveryAt: delivery.deliveryAt, 
+        recipient: delivery.recipient, 
+        availableWarehouses: delivery.availableWarehouses, 
+        shippingAddress: delivery.shippingAddress,  
+        timeline:delivery.timeline, 
+        expectedTime:delivery.expectedTime, 
+        suggestedTimeOut:delivery.suggestedTimeOut, 
+        deliveryDistance:delivery.deliveryDistance, 
+        comments: delivery.comments,
+        flowID: "",
+        sms: delivery.sms,
+    
       }
     ])
     setAlertVisible(false)
@@ -133,15 +126,15 @@ export function ExchangeForm({visible,handleVisibility,delivery}) {
       return (
           <div className="overflow-y-auto fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
             <div className="p-5 m-10 max-h-xl bg-white rounded-lg border border-gray-200 shadow-md dark:bg-gray-800 dark:border-gray-700">
-            {alertVisible  &&
-                  <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-6" role="alert">
-                  <strong class="font-bold">🧙‍♂️ Hello traveler...</strong>
-                  <span class="block sm:inline">Double check that all the fields are not empty</span>
-                  <span class="absolute top-0 bottom-0 right-0 px-4 py-3">
-                    <svg class="fill-current h-6 w-6 text-red-500" role="button" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><title>Close</title><path d="M14.348 14.849a1.2 1.2 0 0 1-1.697 0L10 11.819l-2.651 3.029a1.2 1.2 0 1 1-1.697-1.697l2.758-3.15-2.759-3.152a1.2 1.2 0 1 1 1.697-1.697L10 8.183l2.651-3.031a1.2 1.2 0 1 1 1.697 1.697l-2.758 3.152 2.758 3.15a1.2 1.2 0 0 1 0 1.698z"/></svg>
-                  </span>
-                </div>
-                }
+            {alertVisible &&
+              <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-6" role="alert">
+                <strong class="block font-bold">🧙‍♂️ Hello traveler... Double check that:</strong>
+                <span class="block">- All the fields are not empty.</span>
+                <span class="absolute top-0 bottom-0 right-0 px-4 py-3">
+                  <svg onClick={() => setAlertVisible(false)} class="fill-current h-6 w-6 text-red-500" role="button" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><title>Close</title><path d="M14.348 14.849a1.2 1.2 0 0 1-1.697 0L10 11.819l-2.651 3.029a1.2 1.2 0 1 1-1.697-1.697l2.758-3.15-2.759-3.152a1.2 1.2 0 1 1 1.697-1.697L10 8.183l2.651-3.031a1.2 1.2 0 1 1 1.697 1.697l-2.758 3.152 2.758 3.15a1.2 1.2 0 0 1 0 1.698z" /></svg>
+                </span>
+              </div>
+              }
               <form onSubmit={handleSubmit}>
                     {inputFieldsGlobal[0].lineItems.map(inputField => (
               <div key={inputField.id} style={{ gridColumn: "1 / -1" }}>

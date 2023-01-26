@@ -1,18 +1,19 @@
 import React, { useEffect } from 'react'
 import { useState } from 'react'
 import db from '../../firebase'
-import { setDoc,doc,getDoc } from 'firebase/firestore';
+import { setDoc,doc,getDoc, getCountFromServer, collection,where, query} from 'firebase/firestore';
 import { UserAuth } from '../../context/authContex';
 import Select from 'react-select';
-import {handleChangeSelect,handleChangeInput,checkEmptyValues} from './handleForm'
+import {handleChangeInput,checkEmptyValues} from './handleForm'
 const orderid = require('order-id')('key');
 
 
 
 export function RecipientForm({visible, handleVisibility, edit, recipient}) {
-    const {dropDownClients, dropDownWarehouses, dropDownContacts, dropDownCity, dropDownCountry, dropDownPostalCode} = UserAuth();
+    const {dropDownClients, dropDownWarehouses, dropDownContacts, dropDownCity, dropDownCountry, dropDownPostalCode, user} = UserAuth();
     const [alertVisible, setAlertVisible] = useState(false);
     const [disabled, setDisabled] = useState(false);
+    const [name, setName] = useState("");
     const [contactsToUpdate, setContactsToUpdate] = useState([]);
     const [inputFields, setInputFields] = useState([{
         shippingAddress: {city: "", postalCode: "", country:"Germany", address: ""}, 
@@ -23,7 +24,9 @@ export function RecipientForm({visible, handleVisibility, edit, recipient}) {
         recipientID: "",
         contacts:[],
         updatedAt: "",
-        createdAt: ""
+        createdAt: "",
+        updatedBy: user.email,
+        createdBy: user.email
       }]);
 
       useEffect(() => {
@@ -31,52 +34,71 @@ export function RecipientForm({visible, handleVisibility, edit, recipient}) {
           setInputFields([recipient])
           setContactsToUpdate(recipient.contacts)
           setDisabled(edit);
+          setName(recipient.name)
         }
       }, [visible])
 
     const handleSubmit = async (e) => {
       e.preventDefault();
-      if(!edit){
-        inputFields[0].id = orderid.generate()
-        inputFields[0].recipientID = `${inputFields[0].client.clientID}-${inputFields[0].name}-${inputFields[0].id}`
-        inputFields[0].createdAt = new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"})
+      console.log(inputFields[0])
+      const snap = await getCountFromServer(query(
+        collection(db, 'recipients'), where("name", '==', inputFields[0].name)
+      ))
+      if(snap.data().count > 0 && (!edit || (edit && (name !== inputFields[0].name)))){
+        setAlertVisible(true)
       }
-      if(checkEmptyValues(inputFields[0])){
-        if(edit){
+      else{
+        if(!edit){
+          inputFields[0].id = orderid.generate()
+          inputFields[0].recipientID = `${inputFields[0].client.clientID}-${inputFields[0].name}-${inputFields[0].id}`
+          inputFields[0].createdAt = new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"})
           inputFields[0].updatedAt = new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"})
-          for(var i = 0; i < contactsToUpdate.length; ++i){
-            const docRef = doc(db, "contacts", `${contactsToUpdate[i].contactID}`); 
+        }
+        if(checkEmptyValues(inputFields[0])){
+          if(edit){
+            inputFields[0].updatedAt = new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"})
+            inputFields[0].updatedBy = user.email
+            for(var i = 0; i < contactsToUpdate.length; ++i){
+              const docRef = doc(db, "contacts", `${contactsToUpdate[i].contactID}`); 
+              const docSnap = await getDoc(docRef);
+              if (docSnap.exists()) {
+                let contact = docSnap.data()
+                const j = contact.recipients.findIndex(e => e.recipientID === inputFields[0].recipientID);
+                if (j > -1) {
+                  let recipients = contact.recipients
+                  recipients.splice(j,1)
+                  contact.recipients = recipients
+                  contact.updatedAt = new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"})
+                  contact.updatedBy = user.email
+                }
+                await setDoc(doc(db, "clients", `${inputFields[0].client.clientID}/contacts/${contactsToUpdate[i].contactID}`), contact)
+                await setDoc(doc(db, "clients", `${inputFields[0].client.clientID}`), { updatedAt: new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"}), updatedBy: user.email }, { merge: true });  
+                await setDoc(doc(db, "contacts", `${contactsToUpdate[i].contactID}`), contact)
+              }
+            }
+          }
+          for(var i = 0; i < inputFields[0].contacts.length; ++i){
+            const docRef = doc(db, "contacts", `${inputFields[0].contacts[i].contactID}`); 
             const docSnap = await getDoc(docRef);
             if (docSnap.exists()) {
               let contact = docSnap.data()
-              const j = contact.recipients.findIndex(e => e.recipientID === inputFields[0].recipientID);
-              if (j > -1) {
-                let recipients = contact.recipients
-                recipients.splice(j,1)
-                contact.recipients = recipients
-              }
-              await setDoc(doc(db, "clients", `${inputFields[0].client.clientID}/contacts/${contactsToUpdate[i].contactID}`), contact)
-              await setDoc(doc(db, "contacts", `${contactsToUpdate[i].contactID}`), contact)
+              contact.updatedAt = new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"})
+              contact.updatedBy = user.email
+              contact.recipients.push({name:inputFields[0].name, availableWarehouses:inputFields[0].availableWarehouses,shippingAddress:inputFields[0].shippingAddress, recipientID: inputFields[0].recipientID})
+              await setDoc(doc(db, "clients", `${inputFields[0].client.clientID}/contacts/${inputFields[0].contacts[i].contactID}`), contact)
+              await setDoc(doc(db, "clients", `${inputFields[0].client.clientID}`), { updatedAt: new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"}), updatedBy: user.email }, { merge: true });  
+              await setDoc(doc(db, "contacts", `${inputFields[0].contacts[i].contactID}`), contact)
             }
           }
+          await setDoc(doc(db, "recipients", inputFields[0].recipientID), inputFields[0]);
+          await setDoc(doc(db, "clients", `${inputFields[0].client.clientID}/recipients/${inputFields[0].recipientID}`), inputFields[0]) 
+          await setDoc(doc(db, "clients", `${inputFields[0].client.clientID}`), { updatedAt: new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"}), updatedBy: user.email }, { merge: true });  
+          setAlertVisible(false)
+          clearRecipientForm()
         }
-        for(var i = 0; i < inputFields[0].contacts.length; ++i){
-          const docRef = doc(db, "contacts", `${inputFields[0].contacts[i].contactID}`); 
-          const docSnap = await getDoc(docRef);
-          if (docSnap.exists()) {
-            let contact = docSnap.data()
-            contact.recipients.push({name:inputFields[0].name, availableWarehouses:inputFields[0].availableWarehouses,shippingAddress:inputFields[0].shippingAddress, recipientID: inputFields[0].recipientID})
-            await setDoc(doc(db, "clients", `${inputFields[0].client.clientID}/contacts/${inputFields[0].contacts[i].contactID}`), contact)
-            await setDoc(doc(db, "contacts", `${inputFields[0].contacts[i].contactID}`), contact)
-          }
+        else{
+          setAlertVisible(true)
         }
-        await setDoc(doc(db, "recipients", inputFields[0].recipientID), inputFields[0]);
-        await setDoc(doc(db, "clients", `${inputFields[0].client.clientID}/recipients/${inputFields[0].recipientID}`), inputFields[0]) 
-        setAlertVisible(false)
-        clearRecipientForm()
-      }
-      else{
-        setAlertVisible(true)
       }
     };
 
@@ -90,7 +112,9 @@ export function RecipientForm({visible, handleVisibility, edit, recipient}) {
         recipientID: "",
         contacts:[],
         updatedAt: "",
-        createdAt: ""
+        createdAt: "",
+        updatedBy: user.email,
+        createdBy: user.email
       }])
       handleVisibility(false)
       setAlertVisible(false)
@@ -188,8 +212,9 @@ export function RecipientForm({visible, handleVisibility, edit, recipient}) {
               <div className="p-5 m-10 max-h-xl bg-white rounded-lg border border-gray-200 shadow-md dark:bg-gray-800 dark:border-gray-700">
               {alertVisible  &&
                   <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-6" role="alert">
-                  <strong class="font-bold">🧙‍♂️ Hello traveler...</strong>
-                  <span class="block sm:inline">Double check that all the fields are not empty</span>
+                  <strong class="block font-bold">🧙‍♂️ Hello traveler... Double check that:</strong>
+                  <span class="block">- All the fields are not empty.</span>
+                  <span class="block">- There is no other recipient with the same name</span>
                   <span class="absolute top-0 bottom-0 right-0 px-4 py-3">
                     <svg class="fill-current h-6 w-6 text-red-500" role="button" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><title>Close</title><path d="M14.348 14.849a1.2 1.2 0 0 1-1.697 0L10 11.819l-2.651 3.029a1.2 1.2 0 1 1-1.697-1.697l2.758-3.15-2.759-3.152a1.2 1.2 0 1 1 1.697-1.697L10 8.183l2.651-3.031a1.2 1.2 0 1 1 1.697 1.697l-2.758 3.152 2.758 3.15a1.2 1.2 0 0 1 0 1.698z"/></svg>
                   </span>
