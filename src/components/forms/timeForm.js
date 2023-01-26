@@ -62,7 +62,7 @@ export function TimeForm({visible, handleVisibility, delivery, timeline}) {
       delivery.timeline.closedM = new Date().toLocaleTimeString({ timeZone: "Europe/Berlin"},{hour: '2-digit', minute:'2-digit', hour12: true }).toUpperCase().substring(3,5);
       delivery.timeline.closedAMPM = new Date().toLocaleTimeString({ timeZone: "Europe/Berlin"},{hour: '2-digit', minute:'2-digit', hour12: true }).toUpperCase().substring(6,8);
       if(checkCorrectTime(timeline)){
-        delivery.flowID = deliveryToFlow(delivery,false,user)
+        delivery.flowID = await deliveryToFlow(delivery,false,user)
         if (delivery.type === "Order") {
           await setDoc(doc(db, "orders", delivery.deliveryID), delivery);
           await setDoc(doc(db, "clients", `${delivery.client.clientID}/orders/${delivery.deliveryID}`), delivery)
@@ -75,6 +75,7 @@ export function TimeForm({visible, handleVisibility, delivery, timeline}) {
           await setDoc(doc(db, "contacts", `${delivery.contact.contactID}/returns/${delivery.deliveryID}`), delivery)
           await setDoc(doc(db, "clients", `${delivery.client.clientID}/contacts/${delivery.contact.contactID}/returns/${delivery.deliveryID}`), delivery)
         }
+        handleVisibility(false)
         setAlertVisible(false)
         await setDoc(doc(db, "clients", `${delivery.client.clientID}`), { updatedAt: new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"}), updatedBy: user.email }, { merge: true }); 
         await setDoc(doc(db, "clients", `${delivery.client.clientID}/contacts/${delivery.contact.contactID}`), { updatedAt: new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"}), updatedBy: user.email }, { merge: true }); 
