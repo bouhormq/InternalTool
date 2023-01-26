@@ -1222,7 +1222,7 @@ export function StatusPill({ row }) {
       >
         {status}
       </span>
-      {row.deliveryID.endsWith("R") &&
+      {(row.deliveryID && row.deliveryID.endsWith("R")) &&
         <span
         className={
           classNames(
