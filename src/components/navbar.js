@@ -66,6 +66,7 @@ export function Navbar(){
         <Link class="inline-block text-gray-500 hover:text-gray-600 hover:bg-gray-50 rounded-t-lg py-4 px-4 text-sm font-medium text-center" to="contacts"> Contacts</Link>
         <Link class="inline-block text-gray-500 hover:text-gray-600 hover:bg-gray-50 rounded-t-lg py-4 px-4 text-sm font-medium text-center" to="warehouses"> Warehouses</Link>
         <Link class="inline-block text-gray-500 hover:text-gray-600 hover:bg-gray-50 rounded-t-lg py-4 px-4 text-sm font-medium text-center" to="messages"> Messages</Link>
+        <Link class="inline-block text-gray-500 hover:text-gray-600 hover:bg-gray-50 rounded-t-lg py-4 px-4 text-sm font-medium text-center" to="riders"> Riders</Link>
         <Link class="inline-block text-gray-500 hover:text-gray-600 hover:bg-gray-50 rounded-t-lg py-4 px-4 text-sm font-medium text-center" to="calendar"> Calendar</Link>
         {/*
         <div className="logo">

@@ -21,7 +21,7 @@ import { ExportToExcel } from "./excelfile.js"
 import Select from 'react-select'
 import { UserAuth } from '../context/authContex'
 import Editable from './forms/editable'
-import { checkEmptyValues, deleteSeries } from './forms/handleForm'
+import {deleteSeries } from './forms/handleForm'
 import { WarehouseForm } from './forms/warehouseForm'
 import { ContactForm } from './forms/contactForm'
 import {InventoryForm} from './forms/inventoryForm'
@@ -30,6 +30,7 @@ import {FlowsForm} from './forms/flowsForm'
 import { DeliveryForm } from './forms/deliveryForm'
 import { ExchangeForm } from './forms/exchangesForm'
 import { CommentsForm } from './forms/commentsForm'
+import RiderForm from './forms/riderForm'
 const orderid = require('order-id')('key');
 
 
@@ -896,6 +897,40 @@ export function CancelAlertWarehouse({ visible, handleVisibility, warehouse }) {
   }
 }
 
+
+export function CancelAlertRider({ visible, handleVisibility, rider }) {
+  const {inventory, user} = UserAuth();
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    await deleteDoc(doc(db, "riders", rider.riderID));
+    handleVisibility(false)
+  };
+
+  if (!visible) return null;
+  else {
+    return (
+      <div className="z-10 overflow-y-auto fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+        <div className="p-5 m-10 max-h-xl bg-white rounded-lg border border-gray-200 shadow-md dark:bg-gray-800 dark:border-gray-700">
+          <form onSubmit={handleSubmit}>
+            <div class="grid gap-6 mb-6 md:grid-cols-1">
+              <div>
+                <div class="bg-red-500 text-white font-bold rounded-t px-4 py-2">
+                  🧙‍♂️ Danger!!
+                </div>
+                <div class="border border-t-0 border-red-400 rounded-b bg-red-100 px-4 py-3 text-red-700">
+                  <p>If you delete this rider, you wont be able to use it for future deliveries.</p>
+                </div>
+              </div>
+            </div>
+            <button type="button" onClick={() => handleVisibility(false)} class=" text-white bg-slate-700 hover:bg-grey-800 focus:ring-4 focus:outline-none focus:ring-red-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">Cancel</button>
+            <button type="submit"  class="ml-5 text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-red-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-800">Delete</button>
+          </form>
+        </div>
+      </div>
+    );
+  }
+}
+
 export function CancelAlertContacts({ visible, handleVisibility, contact }) {
   const {user} = UserAuth();
   const handleSubmit = async (e) => {
@@ -1090,6 +1125,20 @@ export function ActionWarehouse({ row }) {
         <img onClick={() => setEditFormVisible(true)} src={edit} width={"20px"} style={{ display: "block", margin: "auto" }} />
         <CancelAlertWarehouse handleVisibility={setCancelFormVisible} visible={cancelFormVisible} warehouse={row} />
         <WarehouseForm handleVisibility={setEditFormVisible} visible={editFormVisible} warehouse={row} key={row} edit={true} />
+      </div>
+    )
+}
+
+
+export function ActionRider({ row }) {
+  const [cancelFormVisible, setCancelFormVisible] = useState(false);
+  const [editFormVisible, setEditFormVisible] = useState(false);
+    return (
+      <div style={{ display: "flex", justifyContent: "center" }} className="timer">
+        <img onClick={() => setCancelFormVisible(true)} src={cancell} width={"20px"} style={{ display: "block", margin: "auto" }} />
+        <img onClick={() => setEditFormVisible(true)} src={edit} width={"20px"} style={{ display: "block", margin: "auto" }} />
+        <CancelAlertRider handleVisibility={setCancelFormVisible} visible={cancelFormVisible} rider={row} />
+        <RiderForm handleVisibility={setEditFormVisible} visible={editFormVisible} rider={row} key={row} edit={true} />
       </div>
     )
 }
