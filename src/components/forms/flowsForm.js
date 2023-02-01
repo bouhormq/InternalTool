@@ -238,7 +238,7 @@ export function FlowsForm({ visible, handleVisibility, direction, edit ,flow}) {
 
   const handleChangeInputFieldsGlobal = async (event) => {
     const newInputFieldsGlobal = inputFieldsGlobal.map(i => {
-      i[event.target.name] = event.target.value
+      i[event.target.name] = event.target.value.trim()
       return i;
     })
     setInputFieldsGlobal(newInputFieldsGlobal)

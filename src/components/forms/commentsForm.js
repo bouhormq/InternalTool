@@ -30,7 +30,7 @@ export function CommentsForm({visible, handleVisibility, delivery, flow}) {
     };
 
     const handleChangeInput = (event) =>{
-    setInputFields(event.target.value);
+    setInputFields(event.target.value.trim());
     }
 
 

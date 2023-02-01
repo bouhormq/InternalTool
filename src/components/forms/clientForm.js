@@ -76,7 +76,7 @@ export default function ClientForm({ visible, handleVisibility }) {
   const handleChangeInput = (event) => {
     setInputFieldsGlobal([{ 
       clientID: "" ,
-      name: event.target.value,
+      name: event.target.value.trim(),
       id: "",
       createdAt: "",
       createdBy: user.email,

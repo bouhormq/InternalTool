@@ -134,7 +134,7 @@ export function InventoryForm({visible, handleVisibility, inventory, edit}) {
 
     const handleChangeInputForm = (event) =>{
         const newInputFields = inputFields.map( i => {     
-            i[event.target.name] = event.target.value
+            i[event.target.name] = event.target.value.trim()
             return i;
         })
         setInputFields(newInputFields);

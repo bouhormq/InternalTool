@@ -23,6 +23,10 @@ export function Returns() {
           snapshot.docs.forEach((doc) => {
             setData((prev) => [ doc.data() , ...prev])
           })
+          data.sort(function(a,b){
+            return new Date(b["deliveryAt"]) - new Date(a["deliveryAt"])
+          })
+          setData(data)
         }
     })  
     return () => {

@@ -27,6 +27,10 @@ export function Flows() {
         snapshot.docs.forEach((doc) => {
           setOutgoing((prev) => [ doc.data() , ...prev])
         })
+        outgoing.sort(function(a,b){
+          return new Date(b["deliveryAt"]) - new Date(a["deliveryAt"])
+        })
+        setOutgoing(outgoing)
       }
     })
     onSnapshot(q2, (snapshot) => {
@@ -35,6 +39,10 @@ export function Flows() {
         snapshot.docs.forEach((doc) => {
           setIncoming((prev) => [ doc.data() , ...prev])
         })
+        incoming.sort(function(a,b){
+          return new Date(b["deliveryAt"]) - new Date(a["deliveryAt"])
+        })
+        setIncoming(outgoing)
       }
       return () => {
         isMounted = false;

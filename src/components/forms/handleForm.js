@@ -131,10 +131,10 @@ export const contractLengthOptions = [
 export const handleChangeCheckbox = (event, daysOfWeek) => {
     var daysOfWeekArray = daysOfWeek
       if(event.target.checked === true) {
-        daysOfWeekArray.push(event.target.value)
+        daysOfWeekArray.push(event.target.value.trim())
       }
       if(event.target.checked === false) {
-        var index = daysOfWeekArray.indexOf(event.target.value);
+        var index = daysOfWeekArray.indexOf(event.target.value.trim());
         if (index !== -1) {
           daysOfWeekArray.splice(index, 1);
         }
@@ -261,10 +261,10 @@ export const handleRemoveFields = async (id,inputFields) => {
     export const handleChangeInput = async (event, name, inputFields) =>{
       var  auxInputFields = inputFields
       if(name.includes('.')){
-        auxInputFields = setPropertyNestedObject(inputFields, name, event.value)
+        auxInputFields = setPropertyNestedObject(inputFields, name, event.value.trim())
       }
       else{
-        auxInputFields[name] = event.value
+        auxInputFields[name] = event.value.trim()
       }
       return [auxInputFields];
     }
@@ -438,7 +438,7 @@ export const handleSkuForm = async (event, id, name, inputFields) => {
     let newInputFields = inputFields["lineItems"].map(i => {
       if(id === i.id) {
         if(name === "quantity"){
-          i[event.target.name] = Number(event.target.value)
+          i[event.target.name] = Number(event.target.value.trim())
         }
         else{
           i[name] = event.value

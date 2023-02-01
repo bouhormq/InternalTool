@@ -4,7 +4,8 @@ import React from 'react';
 import {onSnapshot, collection} from 'firebase/firestore';
 import db from '../firebase'
 import { GoogleAuthProvider, signOut, signInWithCredential,onAuthStateChanged  } from 'firebase/auth'
-import { GoogleAuth} from '../gapi'
+import { gapi } from 'gapi-script'
+import { SCOPE, CLIENT_ID, API_KEY, DISCOVERY_DOCS } from '../gapiVar';
 
 
 
@@ -13,8 +14,8 @@ const AuthContext = createContext();
 
 export const AuthContextProvider = ({ children }) => {
   const [user, setUser] = useState(null);
-  const [accessToken, setAccessToken] = useState({});
   const [clients, setClients] = useState({});
+  const [GoogleAuth, setGoogleAuth] = useState({});
   const [dropDownClients, setDropDownClients] = useState([]);
   const [dropDownContacts, setDropDownContacts] = useState([]);
   const [dropDownWarehouses, setDropDownWarehouses] = useState([]);
@@ -27,8 +28,34 @@ export const AuthContextProvider = ({ children }) => {
   const [warehouses, setWarehouses] = useState({});
   const [inventory, setinventory] = useState({});
 
+  useEffect(() => {
+    onLoad()
+  }, []); 
 
-
+  function onLoad(){
+    function handleClientLoad() {
+      // Load the API's client and auth2 modules.
+      // Call the initClient function after the modules load.
+      gapi.load('client:auth2', initClient);
+    }
+  
+  function initClient() {
+    // In practice, your app can retrieve one or more discovery documents.
+  
+    // Initialize the gapi.client object, which app uses to make API requests.
+    // Get API key and client ID from API Console.
+    // 'scope' field specifies space-delimited list of access scopes.
+      gapi.client.init({
+          apiKey: API_KEY,
+          clientId: CLIENT_ID,
+          scope: SCOPE,
+        'discoveryDocs': DISCOVERY_DOCS,
+      }).then(async function () {
+        setGoogleAuth(gapi.auth2.getAuthInstance())
+      });
+    }
+    handleClientLoad()
+  }
   
   const googleSignIn = async () => {
       Promise.resolve(GoogleAuth.signIn()).then(async function(value) {
@@ -62,7 +89,6 @@ export const AuthContextProvider = ({ children }) => {
       if (currentUser) {
         console.log("state = definitely signed in")
         setUser(currentUser);
-        setAccessToken(currentUser.accessToken)
         console.log(currentUser)
       }
       else {
@@ -163,7 +189,7 @@ export const AuthContextProvider = ({ children }) => {
   }, [])
 
   return (
-    <AuthContext.Provider value={{ googleSignIn, logOut, user, accessToken, clients, warehouses, dropDownClients, dropDownWarehouses, dropDownContacts,dropDownRecipients,dropDownInventory,dropDownRiders,dropDownCity,dropDownCountry,dropDownPostalCode,inventory}}>
+    <AuthContext.Provider value={{GoogleAuth,googleSignIn, logOut, user, clients, warehouses, dropDownClients, dropDownWarehouses, dropDownContacts,dropDownRecipients,dropDownInventory,dropDownRiders,dropDownCity,dropDownCountry,dropDownPostalCode,inventory}}>
       {children}
     </AuthContext.Provider>
   );

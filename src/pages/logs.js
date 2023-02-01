@@ -27,6 +27,10 @@ export function Logs() {
           snapshot.docs.forEach((doc) => {
             setData((prev) => [ doc.data() , ...prev])
           })
+          data.sort(function(a,b){
+            return new Date(b["deliveryAt"]) - new Date(a["deliveryAt"])
+          })
+          setData(data)
         }
     })
     onSnapshot(oldq, (snapshot) => {
@@ -35,6 +39,10 @@ export function Logs() {
         snapshot.docs.forEach((doc) => {
           setoldData((prev) => [ doc.data() , ...prev])
         })
+        oldData.sort(function(a,b){
+          return new Date(b["deliveryAt"]) - new Date(a["deliveryAt"])
+        })
+        setoldData(data)
       }
     })  
     return () => {

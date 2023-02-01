@@ -115,7 +115,7 @@ export function WarehouseForm({visible, handleVisibility, warehouse, edit}) {
   
       const handleChangeInput = (event) =>{
         const newInputFields = inputFields.map( i => {     
-            i[event.target.name] = event.target.value
+            i[event.target.name] = event.target.value.trim()
             return i;
         })
         setInputFields(newInputFields);

@@ -92,7 +92,7 @@ export default function RiderForm({ visible, handleVisibility,edit,rider }) {
 
   const handleChangeInput = (event) =>{
     const newInputFields = inputFieldsGlobal.map( i => {     
-        i[event.target.name] = event.target.value
+        i[event.target.name] = event.target.value.trim()
         return i;
     })
     setInputFieldsGlobal(newInputFields);

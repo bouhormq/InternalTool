@@ -3,6 +3,7 @@ import db from '../../firebase'
 import { useState } from 'react'
 import { setDoc,doc } from 'firebase/firestore';
 import { UserAuth } from '../../context/authContex';
+import addCalendarEvent from '../../gapi'
 import {addMinutes, publishTheCalenderEvent,deleteSeries,updateLineItemStats,validateContact, handleSkuForm, handleChangeCheckbox, handleRemoveFields, handleAddFields,handleChangeSelect, tosOptions, frequencyOptions, contractLengthOptions, SchedulingVisibility} from './handleForm';
 import  Select  from 'react-select';
 const orderid = require('order-id')('key');
@@ -18,6 +19,8 @@ export function DeliveryForm({visible,handleVisibility,type,edit,delivery}) {
   const [disabled, setDisabled] = useState(false);
   const [alertVisible, setAlertVisible] = useState(false);
   const [numberContacts, setNumberContacts] = useState(2);
+
+  
   const [inputFieldsGlobal, setInputFieldsGlobal] = useState([
     { id: "",
       type: type, 
@@ -125,9 +128,7 @@ export function DeliveryForm({visible,handleVisibility,type,edit,delivery}) {
           if(!edit || (edit && editSeries))  inputFieldsGlobal[0].deliveryID = `${inputFieldsGlobal[0].client.clientID}-${inputFieldsGlobal[0].recipient.recipientID}-${inputFieldsGlobal[0].id}`
           /*if(!edit){
             const date = new Date(inputFieldsGlobal[0].deliveryAt);
-            
-            const newDate = addMinutes(date, 30);
-            console.log(date,newDate)
+
             var event = {
               summary: "Hello World",
               location: inputFieldsGlobal[0].shippingAddress.address,
@@ -150,8 +151,7 @@ export function DeliveryForm({visible,handleVisibility,type,edit,delivery}) {
               },
             };
             var calendarID = warehouses[inputFieldsGlobal[0].availableWarehouses[0]].calendarDeliveries
-            console.log(calendarID)
-            //publishTheCalenderEvent(event,calendarID)
+            addCalendarEvent(date,inputFieldsGlobal[0].shippingAddress.address,inputFieldsGlobal[0].client.name,calendarID)
           }*/
           await setDoc(doc(db, "orders", inputFieldsGlobal[0].deliveryID), inputFieldsGlobal[0]);
           await setDoc(doc(db, "clients", `${inputFieldsGlobal[0].client.clientID}/orders/${inputFieldsGlobal[0].deliveryID}`), inputFieldsGlobal[0])
@@ -369,7 +369,7 @@ export function DeliveryForm({visible,handleVisibility,type,edit,delivery}) {
 
   const handleChangeInputFieldsGlobal = async (event) => {    
     const newInputFieldsGlobal = inputFieldsGlobal.map(i => {
-      i[event.target.name] = event.target.value  
+      i[event.target.name] = event.target.value.trim()
       return i;
     })
     setInputFieldsGlobal(newInputFieldsGlobal)

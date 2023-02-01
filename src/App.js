@@ -17,16 +17,12 @@ import {Recipients} from './pages/recipients'
 import {Contacts} from './pages/contacts'
 import { Exchanges } from './pages/exchanges';
 import { Calendars } from './pages/calendar';
-import { onLoad } from './gapi';
 import { Riders } from './pages/riders';
 
 
 
 
-function App() {
-  useEffect(() => {
-    onLoad()
-  }, []);  
+function App() { 
   return (
     <div className="App">
       <AuthContextProvider>

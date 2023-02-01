@@ -19,7 +19,7 @@ const orderid = require('order-id')('key');
     const [inputFields, setInputFields] = useState("");
     const [inputFields1, setInputFields2] = useState("");
     let failOption = [{value:`Lieferung an ${delivery.recipient.name} fehlgeschlagen: Zum heutigen Drop-Off Termin wurde kein Empfänger angetroffen.
-    Unter folgendem Link können Sie eine Nachlieferung anfordern: https://cal.com/onespot/delivery?metadata[id]=${delivery.deliveryID}.
+    Unter folgendem Link können Sie eine Nachlieferung anfordern: https://cal.com/onespot/delivery?metadata[id]=${delivery.id}.
     Wir liefern Mo.-Sa. zwischen 7.00 und 23.00 Uhr zu frei wählbaren 30-Minuten Slots, oder sofort innerhalb von 30 Minuten.
     Wir freuen uns!`, label:"No staff was present", labelGerman:"Es war kein Personal anwesend"}]
 
@@ -111,7 +111,7 @@ const orderid = require('order-id')('key');
     }
 
     const handleChangeInput = (event) =>{
-      setInputFields2(event.target.value);
+      setInputFields2(event.target.value.trim());
       }
     
   

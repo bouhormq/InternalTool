@@ -26,6 +26,10 @@ export function Messages() {
           snapshot.docs.forEach((doc) => {
             setData((prev) => [ doc.data() , ...prev])
           })
+          data.sort(function(a,b){
+            return new Date(b["createdAt"]) - new Date(a["createdAt"])
+          })
+          setData(data)
         }
     })
     onSnapshot(colRef2, (snapshot) => {
