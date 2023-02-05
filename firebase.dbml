@@ -111,9 +111,9 @@ Table documents.client {
   clientID string [pk, default: '${name}-{id}'] 
   id string [note: 'Auto-generated via orderd-id package, can be used to calculate createdAt value'] 
   name string [note: 'When attempted to add a new client, notify the user when client is already in the db and create a new documents if it already exists'] 
-  createdAt string [default: `new Date().toLocaleString("sv", { timeZone: "Europe/Berlin" })`]
+  createdAt string [default: `Timestamp.fromDate(new Date(new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"})))`]
   createdBy string 
-  updatedAt string [note: 'Update this value when documents or subcollections are updated with new Date().toLocaleString("sv", { timeZone: "Europe/Berlin" })'] 
+  updatedAt string [note: 'Update this value when documents or subcollections are updated with Timestamp.fromDate(new Date(new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"})))'] 
   updatedBy string [default: `user.email`]
   reminders collection [note: 'All documents in this collections have to be updated twice, once in the clients collections and once again in the main collections '] 
   contacts collection [note: 'All documents in this collections have to be updated twice, once in the clients collections and once again in the main collections ']
@@ -155,7 +155,7 @@ Table documents.flow {
   totalPrice number
   totalWeight number
   type string
-  updatedAt string [note: 'Update this value when documents or subcollections are updated with new Date().toLocaleString("sv", { timeZone: "Europe/Berlin" })'] 
+  updatedAt string [note: 'Update this value when documents or subcollections are updated with Timestamp.fromDate(new Date(new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"})))'] 
   updatedBy string
 }
 
@@ -164,7 +164,7 @@ Table documents.reminder {
   client map [default: '{clientID:"" name:""}']
   contact map [default: '{contactID:"" available:"",email:"",name:"",number:""}']   
   content string
-  createdAt string [default: `new Date().toLocaleString("sv", { timeZone: "Europe/Berlin" })`]
+  createdAt string [default: `Timestamp.fromDate(new Date(new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"})))`]
 }
 
 Table documents.contact {
@@ -182,13 +182,13 @@ Table documents.inventory {
   inventoryID string [pk, default: '${client.clientID}-${skuInt}-{id}']
   barcode string
   client map [default: '{clientID:"" name:""}']
-  createdAt string [default: `new Date().toLocaleString("sv", { timeZone: "Europe/Berlin" })`]
+  createdAt string [default: `Timestamp.fromDate(new Date(new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"})))`]
   currency string [default: 'EUR']
   dimensions map [default:'{H:"",L:"",W:""}']
   id string
   imageId string
   inventory mapsOfMaps [default: '{id:{address:"" city:"",country:"",countryCode:"", postalCode:"",deliversTo:[],id:"",inventoryQuantity:""postalCode: ""province: "", shelf:[]}}}']
-  updatedAt atring [note: 'Update this value when documents or subcollections are updated with new Date().toLocaleString("sv", { timeZone: "Europe/Berlin" })'] 
+  updatedAt atring [note: 'Update this value when documents or subcollections are updated with Timestamp.fromDate(new Date(new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"})))'] 
   inventoryTotalStock number
   price number
   sku string
@@ -225,11 +225,11 @@ Table documents.order {
       contact map [note:"Auto-filled if only one possible contact for recipient, to be selected from recipient contact list otherwise", ref: < documents.recipient.contacts]
       totalPrice number [default:'Sum of price value of all elements in lineItems']
       financialStatus string
-      createdAt string [default: `new Date().toLocaleString("sv", { timeZone: "Europe/Berlin" })`]
-      cancelledAt string [default: `new Date().toLocaleString("sv", { timeZone: "Europe/Berlin" })`]
+      createdAt string [default: `Timestamp.fromDate(new Date(new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"})))`]
+      cancelledAt string [default: `Timestamp.fromDate(new Date(new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"})))`]
       cancelReason string [note:'[Force Mayeur/Staff shortage/Not enough stock/No staff was present]']
       assignedWarehouse string [note: 'id of warehouse responsible for the delivery, has to be present in availableWarehouses']
-      updatedAt string [default: `new Date().toLocaleString("sv", { timeZone: "Europe/Berlin" })`]
+      updatedAt string [default: `Timestamp.fromDate(new Date(new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"})))`]
       fulfillmentStatus string [default: 'open']
       lineItems arrayOfMaps [note:'Never empty', ref: < maps.lineItem.inventoryID]
       client map [ref: - maps.client.clientID]
@@ -283,11 +283,11 @@ Table documents.return {
       contact map [note:"Auto-filled if only one possible contact for recipient, to be selected from recipient contact list otherwise", ref: < documents.recipient.contacts]
       totalPrice number [default:'Sum of price value of all elements in lineItems']
       financialStatus string
-      createdAt string [default: `new Date().toLocaleString("sv", { timeZone: "Europe/Berlin" })`]
-      cancelledAt string [default: `new Date().toLocaleString("sv", { timeZone: "Europe/Berlin" })`]
+      createdAt string [default: `Timestamp.fromDate(new Date(new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"})))`]
+      cancelledAt string [default: `Timestamp.fromDate(new Date(new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"})))`]
       cancelReason string [note:'[Force Mayeur/Staff shortage/Not enough stock/No staff was present]']
       assignedWarehouse string [note: 'id of warehouse responsible for the delivery, has to be present in availableWarehouses']
-      updatedAt string [default: `new Date().toLocaleString("sv", { timeZone: "Europe/Berlin" })`]
+      updatedAt string [default: `Timestamp.fromDate(new Date(new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"})))`]
       fulfillmentStatus string [default: 'open']
       lineItems arrayOfMaps [note:'Never empty', ref: < maps.lineItem.inventoryID]
       client map [ref: - maps.client.clientID]
@@ -372,7 +372,7 @@ Table documents.recipient {
 
 Table documents.reschedule {
   rescheduleID string [pk, default: '${client.clientID}-${to}-{createdAt}-${id}']
-  createdAt string [default: `new Date().toLocaleString("sv", { timeZone: "Europe/Berlin" })`]
+  createdAt string [default: `Timestamp.fromDate(new Date(new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"})))`]
   deliveryID string
   triggerEvent string
   id string
@@ -390,8 +390,8 @@ Table documents.rider {
   name string
   lastName string
   number string [note: 'Hat to include country code regex: (^[\+][(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4,6}$)']
-  createdAt string [default: `new Date().toLocaleString("sv", { timeZone: "Europe/Berlin" })`]
-  updatedAt string [note: 'Update this value when documents or subcollections are updated with new Date().toLocaleString("sv", { timeZone: "Europe/Berlin" })'] 
+  createdAt string [default: `Timestamp.fromDate(new Date(new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"})))`]
+  updatedAt string [note: 'Update this value when documents or subcollections are updated with Timestamp.fromDate(new Date(new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"})))'] 
   updatedBy string [default: `user.email`]
   createdBy string 
   orders collection [note: 'All documents in this collections have to be updated twice, once in the clients collections and once again in the main collections ']
@@ -409,8 +409,8 @@ Table documents.warehouse {
   deliversTo array [note: 'Input field is a string separated coma which is transformed into an array']
   postalCode string [note: 'Should be present in deliversTo']
   province string
-  createdAt string [default: `new Date().toLocaleString("sv", { timeZone: "Europe/Berlin" })`]
-  updatedAt string [note: 'Update this value when documents is updated with new Date().toLocaleString("sv", { timeZone: "Europe/Berlin" })'] 
+  createdAt string [default: `Timestamp.fromDate(new Date(new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"})))`]
+  updatedAt string [note: 'Update this value when documents is updated with Timestamp.fromDate(new Date(new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"})))'] 
   updatedBy string [default: `user.email`]
 }
 

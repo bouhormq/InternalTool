@@ -10,15 +10,15 @@ import { PostalCodes } from '../components/tableCells';
 
 //var distance = require("hpsweb-google-distance");
 
-export function Logs() {
+export function DLogs() {
   const [data, setData] = useState([]);
   const [oldData, setoldData] = useState([]);
   
   useEffect(() => {
     const colRef = collection(db, "orders" )
     const colRef1 = collection(db, "returns" )
-    const q = query(colRef,where("fulfillmentStatus", "in", ["success","cancelled","failure"]));
-    const oldq = query(colRef1, where("fulfillmentStatus", "in", ["success","cancelled","failure"]));
+    const q = query(colRef,where("fulfillmentStatus", "in", ["success","cancelled","failure"]),orderBy("deliveryAt"));
+    const oldq = query(colRef1, where("fulfillmentStatus", "in", ["success","cancelled","failure"]),orderBy("deliveryAt"));
 
     let isMounted = true;
     onSnapshot(q, (snapshot) => {
@@ -27,10 +27,6 @@ export function Logs() {
           snapshot.docs.forEach((doc) => {
             setData((prev) => [ doc.data() , ...prev])
           })
-          data.sort(function(a,b){
-            return new Date(b["deliveryAt"]) - new Date(a["deliveryAt"])
-          })
-          setData(data)
         }
     })
     onSnapshot(oldq, (snapshot) => {
@@ -39,15 +35,11 @@ export function Logs() {
         snapshot.docs.forEach((doc) => {
           setoldData((prev) => [ doc.data() , ...prev])
         })
-        oldData.sort(function(a,b){
-          return new Date(b["deliveryAt"]) - new Date(a["deliveryAt"])
-        })
-        setoldData(data)
       }
     })  
     return () => {
       isMounted = false;
-    };   
+    };  
   }, [])
 
   
@@ -116,6 +108,10 @@ export function Logs() {
       Header: "Comments",
       accessor: "comments",
       id: "comments",
+    },{
+      Header: "Cancel Reason",
+      accessor: "cancelReason",
+      id: "cancelReason",
     },{
       Header: "Invoice Stamp",
       accessor: "invoiceStamp",

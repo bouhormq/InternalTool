@@ -14,7 +14,7 @@ export function Returns() {
   
   useEffect(() => {
     const colRef = collection(db, "returns" )
-    const q = query(colRef, where("fulfillmentStatus", "in", ["open","inProgress"]));
+    const q = query(colRef, where("fulfillmentStatus", "in", ["open","inProgress"]),orderBy("deliveryAt", "desc"));
 
     let isMounted = true;
     onSnapshot(q, (snapshot) => {
@@ -23,10 +23,6 @@ export function Returns() {
           snapshot.docs.forEach((doc) => {
             setData((prev) => [ doc.data() , ...prev])
           })
-          data.sort(function(a,b){
-            return new Date(b["deliveryAt"]) - new Date(a["deliveryAt"])
-          })
-          setData(data)
         }
     })  
     return () => {

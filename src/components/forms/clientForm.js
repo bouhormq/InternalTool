@@ -4,7 +4,10 @@ import db from '../../firebase'
 import { useState } from 'react'
 import { setDoc, getCountFromServer, query, collection, where } from 'firebase/firestore'
 import { UserAuth } from '../../context/authContex'
+import { Timestamp } from "@firebase/firestore";
+
 const orderid = require('order-id')('key');
+
 
 
 
@@ -39,7 +42,7 @@ export default function ClientForm({ visible, handleVisibility }) {
   async function CreateInfo(client) {
     await setDoc(doc(db, "clients", `${client}/info/general`), {
       country_code: "DE",
-      createdAt: new Date().toLocaleString("sv", { timeZone: "Europe/Berlin" })
+      createdAt: Timestamp.fromDate(new Date(new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"})))
     })
     await setDoc(doc(db, "clients", `${client}/info/preferences`), {
       shipping_price: 349,
@@ -51,8 +54,8 @@ export default function ClientForm({ visible, handleVisibility }) {
     if (inputFieldsGlobal[0].name.length > 0) {
       inputFieldsGlobal[0].id = orderid.generate()
       inputFieldsGlobal[0].clientID = `${inputFieldsGlobal[0].name}-${inputFieldsGlobal[0].id}`
-      inputFieldsGlobal[0].createdAt = new Date().toLocaleString("sv", { timeZone: "Europe/Berlin" })
-      inputFieldsGlobal[0].updatedAt = new Date().toLocaleString("sv", { timeZone: "Europe/Berlin" })
+      inputFieldsGlobal[0].createdAt = Timestamp.fromDate(new Date(new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"})))
+      inputFieldsGlobal[0].updatedAt = Timestamp.fromDate(new Date(new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"})))
       const snap = await getCountFromServer(query(
         collection(db, 'clients'), where("name", '==', inputFieldsGlobal[0].name)
       ))

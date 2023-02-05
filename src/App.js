@@ -11,7 +11,8 @@ import { AuthContextProvider } from './context/authContex';
 import {Home} from './pages/home'
 import {Navbar} from "./components/navbar";
 import Protected from "./components/protected"
-import { Logs } from "./pages/logs";
+import { DLogs } from "./pages/dlogs";
+import { FLogs } from "./pages/flogs";
 import { Messages } from './pages/messages';
 import {Recipients} from './pages/recipients'
 import {Contacts} from './pages/contacts'
@@ -34,8 +35,9 @@ function App() {
             <Route path="orders" element={<Orders/>}/>
             <Route path="returns" element={<Returns/>}/>
             <Route path="exchanges" element={<Exchanges/>}/>
-            <Route path="logs" element={<Logs/>}/>
+            <Route path="dlogs" element={<DLogs/>}/>
             <Route path="flows" element={<Flows/>}/>
+            <Route path="flogs" element={<FLogs/>}/>
             <Route path="inventory" element={<Inventory/>}/>
             <Route path="clients" element={<Clients/>}/>
             <Route path="recipients" element={<Recipients/>}/>

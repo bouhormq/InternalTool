@@ -4,6 +4,8 @@ import db from '../../firebase'
 import { setDoc,doc,getCountFromServer, query, where, collection } from 'firebase/firestore';
 import { checkEmptyValues } from './handleForm';
 import { UserAuth } from '../../context/authContex';
+import { Timestamp } from "@firebase/firestore";
+
 
 
 export function WarehouseForm({visible, handleVisibility, warehouse, edit}) {
@@ -46,14 +48,14 @@ export function WarehouseForm({visible, handleVisibility, warehouse, edit}) {
         else{
           if(Array.isArray(inputFields[0].deliversTo)) inputFields[0].deliversTo = inputFields[0].deliversTo.toString();
           if(!edit){
-            inputFields[0].createdAt = new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"})
-            inputFields[0].updatedAt = new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"})
+            inputFields[0].createdAt = Timestamp.fromDate(new Date(new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"})))
+            inputFields[0].updatedAt = Timestamp.fromDate(new Date(new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"})))
             inputFields[0].updatedBy = user.email
             inputFields[0].createdBy = user.email
           }
           else{
             inputFields[0].updatedBy = user.email
-            inputFields[0].updatedAt = new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"})
+            inputFields[0].updatedAt = Timestamp.fromDate(new Date(new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"})))
           }
           if(checkEmptyValues(inputFields[0]) && inputFields[0].deliversTo.match("^[,0-9 ]+$")){
               inputFields[0].deliversTo = inputFields[0].deliversTo.split(',')
@@ -64,7 +66,7 @@ export function WarehouseForm({visible, handleVisibility, warehouse, edit}) {
                   inputFields[0]["shelf"] = inventory[i]["inventory"][inputFields[0].id]["shelf"]
                   inventory[i]["inventory"][inputFields[0].id] = inputFields[0]
                   inventory[i].updatedBy = user.email
-                  inventory[i].updatedAt = new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"})
+                  inventory[i].updatedAt = Timestamp.fromDate(new Date(new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"})))
                   await setDoc(doc(db, "clients", `${inventory[i].client.clientID}/inventory/${inventory[i].inventoryID}`), inventory[i])  
                   await setDoc(doc(db, "inventory", inventory[i].inventoryID), inventory[i]);
                 }
@@ -75,9 +77,9 @@ export function WarehouseForm({visible, handleVisibility, warehouse, edit}) {
                 for(let i = 0; i < inventory.length; i++){
                   inventory[i]["inventory"][inputFields[0].id] = inputFields[0]
                   inventory[i].updatedBy = user.email
-                  inventory[i].updatedAt = new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"})
+                  inventory[i].updatedAt = Timestamp.fromDate(new Date(new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"})))
                   inventory[i].createdBy = user.email
-                  inventory[i].createdAt = new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"})
+                  inventory[i].createdAt = Timestamp.fromDate(new Date(new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"})))
                   await setDoc(doc(db, "clients", `${inventory[i].client.clientID}/inventory/${inventory[i].inventoryID}`), inventory[i])  
                   await setDoc(doc(db, "inventory", inventory[i].inventoryID), inventory[i]);
                 }
@@ -171,7 +173,15 @@ export function WarehouseForm({visible, handleVisibility, warehouse, edit}) {
                     <div >
                         <label for="deliversTo" class="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-300">Delivers To</label>
                         <input type="text" value={inputFields[0].deliversTo} onChange={event => handleChangeInput(event)}  name="deliversTo" id="deliversTo" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="60306, 60308, 60310..." required=""/>
-                    </div>            
+                    </div>   
+                    <div >
+                        <label for="calendarDeliveries" class="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-300">Calendar Deliveries</label>
+                        <input type="text" value={inputFields[0].calendarDeliveries} onChange={event => handleChangeInput(event)}  name="calendarDeliveries" id="calendarDeliveries" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="@group.calendar.google.com" required=""/>
+                    </div>  
+                    <div >
+                        <label for="calendarFlow" class="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-300">Calendar Flow</label>
+                        <input type="text" value={inputFields[0].calendarFlow} onChange={event => handleChangeInput(event)}  name="calendarFlow" id="calendarFlow" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="@group.calendar.google.com" required=""/>
+                    </div>           
                     </div>
                     <button type="submit" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">Save</button>
                     <button type="button" onClick={() => {clearWarehouseForm()}} class="ml-5 text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-red-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">Cancel</button>

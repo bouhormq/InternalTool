@@ -5,6 +5,7 @@ import { setDoc,doc,getCountFromServer,query,collection,where } from 'firebase/f
 import { UserAuth } from '../../context/authContex';
 import Select from 'react-select';
 import {handleChangeInput} from './handleForm';
+import { Timestamp } from "@firebase/firestore";
 const orderid = require('order-id')('key');
 
 
@@ -59,14 +60,14 @@ export function InventoryForm({visible, handleVisibility, inventory, edit}) {
             for (const [key, value] of Object.entries(warehouses)) {
               inventory[key]['inventoryQuantity'] = 0
               inventory[key]['shelf'] = []
-              inventory[key]['createdAt'] = new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"})
-              inventory[key]['updatedAt'] = new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"})
+              inventory[key]['createdAt'] = Timestamp.fromDate(new Date(new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"})))
+              inventory[key]['updatedAt'] = Timestamp.fromDate(new Date(new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"})))
               inventory[key]['createdBy'] = user.email
               inventory[key]['updatedBy'] = user.email
             }
             inputFields[0].id = orderid.generate()
             inputFields[0].skuInt = `${inputFields[0].client.clientID+"-"+inputFields[0].sku}`
-            inputFields[0].createdAt = new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"})
+            inputFields[0].createdAt = Timestamp.fromDate(new Date(new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"})))
             inputFields[0].createdBy = user.email
             inputFields[0].inventory = inventory
             inputFields[0].inventoryID = `${inputFields[0].client.clientID}-${inputFields[0].sku}-${inputFields[0].id}`
@@ -75,7 +76,7 @@ export function InventoryForm({visible, handleVisibility, inventory, edit}) {
           inputFields[0].dimensions={H:parseInt(inputFields[0].dimensions.H),W:parseInt(inputFields[0].dimensions.W),L:parseInt(inputFields[0].dimensions.L)}
           inputFields[0].weight = parseInt(inputFields[0].weight)
           inputFields[0].updatedBy = user.email
-          inputFields[0].updatedAt = new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"})
+          inputFields[0].updatedAt = Timestamp.fromDate(new Date(new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"})))
           await setDoc(doc(db, "inventory", inputFields[0].inventoryID), inputFields[0]);
           await setDoc(doc(db, "clients", `${inputFields[0].client.clientID}/inventory/${inputFields[0].inventoryID}`), inputFields[0])
           setAlertVisible(false)

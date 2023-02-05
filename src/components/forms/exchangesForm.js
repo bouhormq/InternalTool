@@ -5,6 +5,7 @@ import { setDoc,doc } from 'firebase/firestore';
 import { UserAuth } from '../../context/authContex';
 import {updateLineItemStats, handleSkuForm, handleRemoveFields, handleAddFields, checkEmptyValues} from './handleForm';
 import { deliveryToFlow } from './handleForm';
+import { Timestamp } from "@firebase/firestore";
 import  Select  from 'react-select';
 const orderid = require('order-id')('key');
 
@@ -13,7 +14,7 @@ export function ExchangeForm({visible,handleVisibility,delivery}) {
   const {dropDownInventory,user} = UserAuth();
   const [alertVisible, setAlertVisible] = useState(false);
   const [inputFieldsGlobal, setInputFieldsGlobal] = useState([{ 
-    id: "",
+    id: delivery.id,
     type: "Exchange", 
     totalDimensions:"",
     rider:delivery.rider,
@@ -54,24 +55,24 @@ export function ExchangeForm({visible,handleVisibility,delivery}) {
       setAlertVisible(false)
       handleVisibility(false)
       setInputFieldsGlobal(updateLineItemStats(inputFieldsGlobal[0].lineItems,inputFieldsGlobal[0]))
-      inputFieldsGlobal[0].createdAt = new Date().toLocaleString("sv", { timeZone: "Europe/Berlin" })
+      inputFieldsGlobal[0].createdAt = Timestamp.fromDate(new Date(new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"})))
       inputFieldsGlobal[0].createdBy = user.email
-      inputFieldsGlobal[0].invoiceStamp = new Date().toLocaleString("sv", { timeZone: "Europe/Berlin" })
+      inputFieldsGlobal[0].invoiceStamp = Timestamp.fromDate(new Date(new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"})))
       await setDoc(doc(db, "exchanges", inputFieldsGlobal[0].deliveryID), inputFieldsGlobal[0]);
       await setDoc(doc(db, "clients", `${inputFieldsGlobal[0].client.clientID}/exchanges/${inputFieldsGlobal[0].deliveryID}`), inputFieldsGlobal[0])
       await setDoc(doc(db, "contacts", `${inputFieldsGlobal[0].contact.contactID}/exchanges/${inputFieldsGlobal[0].deliveryID}`), inputFieldsGlobal[0])
       await setDoc(doc(db, "clients", `${inputFieldsGlobal[0].client.clientID}/contacts/${inputFieldsGlobal[0].contact.contactID}/exchanges/${inputFieldsGlobal[0].deliveryID}`), inputFieldsGlobal[0])
-      await setDoc(doc(db, "clients", `${inputFieldsGlobal[0].client.clientID}`), { updatedAt: new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"}), updatedBy: user.email }, { merge: true }); 
-      await setDoc(doc(db, "clients", `${inputFieldsGlobal[0].client.clientID}/contacts/${inputFieldsGlobal[0].contact.contactID}`), { updatedAt: new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"}), updatedBy: user.email }, { merge: true }); 
-      await setDoc(doc(db, "contacts", `${inputFieldsGlobal[0].contact.contactID}`), { updatedAt: new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"}), updatedBy: user.email }, { merge: true });
+      await setDoc(doc(db, "clients", `${inputFieldsGlobal[0].client.clientID}`), { updatedAt: Timestamp.fromDate(new Date(new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"}))), updatedBy: user.email }, { merge: true }); 
+      await setDoc(doc(db, "clients", `${inputFieldsGlobal[0].client.clientID}/contacts/${inputFieldsGlobal[0].contact.contactID}`), { updatedAt: Timestamp.fromDate(new Date(new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"}))), updatedBy: user.email }, { merge: true }); 
+      await setDoc(doc(db, "contacts", `${inputFieldsGlobal[0].contact.contactID}`), { updatedAt: Timestamp.fromDate(new Date(new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"}))), updatedBy: user.email }, { merge: true });
       delivery.exchanged = true
       await setDoc(doc(db, "orders", inputFieldsGlobal[0].deliveryID), delivery);
       await setDoc(doc(db, "clients", `${delivery.client.clientID}/orders/${delivery.deliveryID}`), delivery)
       await setDoc(doc(db, "contacts", `${delivery.contact.contactID}/orders/${delivery.deliveryID}`), delivery)
       await setDoc(doc(db, "clients", `${delivery.client.clientID}/contacts/${delivery.contact.contactID}/orders/${delivery.deliveryID}`), delivery)
-      await setDoc(doc(db, "clients", `${delivery.client.clientID}`), { updatedAt: new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"}), updatedBy: user.email }, { merge: true }); 
-      await setDoc(doc(db, "clients", `${delivery.client.clientID}/contacts/${delivery.contact.contactID}`), { updatedAt: new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"}), updatedBy: user.email }, { merge: true }); 
-      await setDoc(doc(db, "contacts", `${delivery.contact.contactID}`), { updatedAt: new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"}), updatedBy: user.email }, { merge: true });
+      await setDoc(doc(db, "clients", `${delivery.client.clientID}`), { updatedAt: Timestamp.fromDate(new Date(new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"}))), updatedBy: user.email }, { merge: true }); 
+      await setDoc(doc(db, "clients", `${delivery.client.clientID}/contacts/${delivery.contact.contactID}`), { updatedAt: Timestamp.fromDate(new Date(new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"}))), updatedBy: user.email }, { merge: true }); 
+      await setDoc(doc(db, "contacts", `${delivery.contact.contactID}`), { updatedAt: Timestamp.fromDate(new Date(new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"}))), updatedBy: user.email }, { merge: true });
       deliveryToFlow(inputFieldsGlobal[0],true,user)
       clearDeliveryForm()
     }
@@ -83,7 +84,7 @@ export function ExchangeForm({visible,handleVisibility,delivery}) {
   const clearDeliveryForm = () => {
     setInputFieldsGlobal([
       { 
-        id: "",
+        id: delivery.id,
         type: "Exchange", 
         totalDimensions:"",
         rider:delivery.rider,
@@ -111,7 +112,7 @@ export function ExchangeForm({visible,handleVisibility,delivery}) {
         suggestedTimeOut:delivery.suggestedTimeOut, 
         deliveryDistance:delivery.deliveryDistance, 
         comments: delivery.comments,
-        flowID: "",
+        flowID: `D-E-${delivery.id}`,
         sms: delivery.sms,
     
       }

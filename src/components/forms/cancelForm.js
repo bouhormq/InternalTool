@@ -7,6 +7,8 @@ import Editable from './editable'
 import Select from 'react-select'
 import { dropDownCancelOptions,dropDownCancelOptionsFlow } from './handleForm';
 import { UserAuth } from '../../context/authContex';
+import { Timestamp } from "@firebase/firestore";
+
 const orderid = require('order-id')('key');
 
 
@@ -28,9 +30,9 @@ const orderid = require('order-id')('key');
     delivery.cancelReason = inputFields
     delivery.comments = inputFields1
     delivery.cancelledBy = user.email
-    delivery.cancelledAt = new Date().toLocaleString("sv", { timeZone: "Europe/Berlin" })
+    delivery.cancelledAt = Timestamp.fromDate(new Date(new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"})))
     delivery.updatedBy = user.email
-    delivery.updatedAt = new Date().toLocaleString("sv", { timeZone: "Europe/Berlin" })
+    delivery.updatedAt = Timestamp.fromDate(new Date(new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"})))
     e.preventDefault();
     if (delivery.cancelReason) {
       if(!flow){
@@ -60,9 +62,9 @@ const orderid = require('order-id')('key');
         await setDoc(doc(db, "clients", `${delivery.client.clientID}/contacts/${delivery.contact.contactID}/flows/${delivery.flowID}`), delivery)
         FlowToInventory(delivery,null,"failure",null, user)
       }
-      await setDoc(doc(db, "clients", `${delivery.client.clientID}`), { updatedAt: new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"}), updatedBy: user.email }, { merge: true }); 
-      await setDoc(doc(db, "contacts", `${delivery.contact.contactID}`), { updatedAt: new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"}), updatedBy: user.email }, { merge: true });  
-      await setDoc(doc(db, "clients", `${delivery.client.clientID}/contacts/${delivery.contact.contactID}`), { updatedAt: new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"}), updatedBy: user.email }, { merge: true });   
+      await setDoc(doc(db, "clients", `${delivery.client.clientID}`), { updatedAt: Timestamp.fromDate(new Date(new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"}))), updatedBy: user.email }, { merge: true }); 
+      await setDoc(doc(db, "contacts", `${delivery.contact.contactID}`), { updatedAt: Timestamp.fromDate(new Date(new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"}))), updatedBy: user.email }, { merge: true });  
+      await setDoc(doc(db, "clients", `${delivery.client.clientID}/contacts/${delivery.contact.contactID}`), { updatedAt: Timestamp.fromDate(new Date(new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"}))), updatedBy: user.email }, { merge: true });   
       handleFlowVisibility(false)
       handleVisibility(false)
     }
@@ -85,7 +87,7 @@ const orderid = require('order-id')('key');
         client: delivery.client,
         daily: false,
         createdBy: user.email,
-        createdAt: new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"}),
+        createdAt: Timestamp.fromDate(new Date(new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"}))),
         type: 'text',
         content: {
           text: task

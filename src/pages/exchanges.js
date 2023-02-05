@@ -14,7 +14,7 @@ export function Exchanges() {
   
   useEffect(() => {
     const colRef = collection(db, "exchanges" )
-    const q = query(colRef);
+    const q = query(colRef,orderBy("deliveryAt", "desc"));
 
     let isMounted = true;
     onSnapshot(q, (snapshot) => {
@@ -23,10 +23,6 @@ export function Exchanges() {
           snapshot.docs.forEach((doc) => {
             setData((prev) => [ doc.data() , ...prev])
           })
-          data.sort(function(a,b){
-            return new Date(b["deliveryAt"]) - new Date(a["deliveryAt"])
-          })
-          setData(data)
         }
     })  
     return () => {

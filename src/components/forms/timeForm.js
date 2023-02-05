@@ -4,6 +4,8 @@ import db from '../../firebase'
 import { setDoc,doc } from 'firebase/firestore';
 import { UserAuth } from '../../context/authContex';
 import { deliveryToFlow } from './handleForm';
+import { Timestamp } from "@firebase/firestore";
+
 
 
 export function TimeForm({visible, handleVisibility, delivery, timeline}) {
@@ -64,12 +66,14 @@ export function TimeForm({visible, handleVisibility, delivery, timeline}) {
       if(checkCorrectTime(timeline)){
         delivery.flowID = await deliveryToFlow(delivery,false,user)
         if (delivery.type === "Order") {
+          delivery.flowID = `D-O-${delivery.deliveryID}`;
           await setDoc(doc(db, "orders", delivery.deliveryID), delivery);
           await setDoc(doc(db, "clients", `${delivery.client.clientID}/orders/${delivery.deliveryID}`), delivery)
           await setDoc(doc(db, "contacts", `${delivery.contact.contactID}/orders/${delivery.deliveryID}`), delivery)
           await setDoc(doc(db, "clients", `${delivery.client.clientID}/contacts/${delivery.contact.contactID}/orders/${delivery.deliveryID}`), delivery)
         }
         else if (delivery.type  === "Return") {
+          delivery.flowID = `R-O-${delivery.deliveryID}`;
           await setDoc(doc(db, "returns", delivery.deliveryID), delivery);
           await setDoc(doc(db, "clients", `${delivery.client.clientID}/returns/${delivery.deliveryID}`), delivery)
           await setDoc(doc(db, "contacts", `${delivery.contact.contactID}/returns/${delivery.deliveryID}`), delivery)
@@ -77,9 +81,9 @@ export function TimeForm({visible, handleVisibility, delivery, timeline}) {
         }
         handleVisibility(false)
         setAlertVisible(false)
-        await setDoc(doc(db, "clients", `${delivery.client.clientID}`), { updatedAt: new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"}), updatedBy: user.email }, { merge: true }); 
-        await setDoc(doc(db, "clients", `${delivery.client.clientID}/contacts/${delivery.contact.contactID}`), { updatedAt: new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"}), updatedBy: user.email }, { merge: true }); 
-        await setDoc(doc(db, "contacts", `${delivery.contact.contactID}`), { updatedAt: new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"}), updatedBy: user.email }, { merge: true });
+        await setDoc(doc(db, "clients", `${delivery.client.clientID}`), { updatedAt: Timestamp.fromDate(new Date(new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"}))), updatedBy: user.email }, { merge: true }); 
+        await setDoc(doc(db, "clients", `${delivery.client.clientID}/contacts/${delivery.contact.contactID}`), { updatedAt: Timestamp.fromDate(new Date(new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"}))), updatedBy: user.email }, { merge: true }); 
+        await setDoc(doc(db, "contacts", `${delivery.contact.contactID}`), { updatedAt: Timestamp.fromDate(new Date(new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"}))), updatedBy: user.email }, { merge: true });
       }
       else{
         setAlertVisible(true)

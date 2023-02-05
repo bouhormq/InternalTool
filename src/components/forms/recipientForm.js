@@ -5,6 +5,7 @@ import { setDoc,doc,getDoc, getCountFromServer, collection,where, query} from 'f
 import { UserAuth } from '../../context/authContex';
 import Select from 'react-select';
 import {handleChangeInput,checkEmptyValues} from './handleForm'
+import { Timestamp } from "@firebase/firestore";
 const orderid = require('order-id')('key');
 
 
@@ -51,12 +52,12 @@ export function RecipientForm({visible, handleVisibility, edit, recipient}) {
         if(!edit){
           inputFields[0].id = orderid.generate()
           inputFields[0].recipientID = `${inputFields[0].client.clientID}-${inputFields[0].name}-${inputFields[0].id}`
-          inputFields[0].createdAt = new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"})
-          inputFields[0].updatedAt = new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"})
+          inputFields[0].createdAt = Timestamp.fromDate(new Date(new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"})))
+          inputFields[0].updatedAt = Timestamp.fromDate(new Date(new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"})))
         }
         if(checkEmptyValues(inputFields[0])){
           if(edit){
-            inputFields[0].updatedAt = new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"})
+            inputFields[0].updatedAt = Timestamp.fromDate(new Date(new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"})))
             inputFields[0].updatedBy = user.email
             for(var i = 0; i < contactsToUpdate.length; ++i){
               const docRef = doc(db, "contacts", `${contactsToUpdate[i].contactID}`); 
@@ -68,11 +69,11 @@ export function RecipientForm({visible, handleVisibility, edit, recipient}) {
                   let recipients = contact.recipients
                   recipients.splice(j,1)
                   contact.recipients = recipients
-                  contact.updatedAt = new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"})
+                  contact.updatedAt = Timestamp.fromDate(new Date(new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"})))
                   contact.updatedBy = user.email
                 }
                 await setDoc(doc(db, "clients", `${inputFields[0].client.clientID}/contacts/${contactsToUpdate[i].contactID}`), contact)
-                await setDoc(doc(db, "clients", `${inputFields[0].client.clientID}`), { updatedAt: new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"}), updatedBy: user.email }, { merge: true });  
+                await setDoc(doc(db, "clients", `${inputFields[0].client.clientID}`), { updatedAt: Timestamp.fromDate(new Date(new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"}))), updatedBy: user.email }, { merge: true });  
                 await setDoc(doc(db, "contacts", `${contactsToUpdate[i].contactID}`), contact)
               }
             }
@@ -82,17 +83,17 @@ export function RecipientForm({visible, handleVisibility, edit, recipient}) {
             const docSnap = await getDoc(docRef);
             if (docSnap.exists()) {
               let contact = docSnap.data()
-              contact.updatedAt = new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"})
+              contact.updatedAt = Timestamp.fromDate(new Date(new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"})))
               contact.updatedBy = user.email
               contact.recipients.push({name:inputFields[0].name, availableWarehouses:inputFields[0].availableWarehouses,shippingAddress:inputFields[0].shippingAddress, recipientID: inputFields[0].recipientID})
               await setDoc(doc(db, "clients", `${inputFields[0].client.clientID}/contacts/${inputFields[0].contacts[i].contactID}`), contact)
-              await setDoc(doc(db, "clients", `${inputFields[0].client.clientID}`), { updatedAt: new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"}), updatedBy: user.email }, { merge: true });  
+              await setDoc(doc(db, "clients", `${inputFields[0].client.clientID}`), { updatedAt: Timestamp.fromDate(new Date(new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"}))), updatedBy: user.email }, { merge: true });  
               await setDoc(doc(db, "contacts", `${inputFields[0].contacts[i].contactID}`), contact)
             }
           }
           await setDoc(doc(db, "recipients", inputFields[0].recipientID), inputFields[0]);
           await setDoc(doc(db, "clients", `${inputFields[0].client.clientID}/recipients/${inputFields[0].recipientID}`), inputFields[0]) 
-          await setDoc(doc(db, "clients", `${inputFields[0].client.clientID}`), { updatedAt: new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"}), updatedBy: user.email }, { merge: true });  
+          await setDoc(doc(db, "clients", `${inputFields[0].client.clientID}`), { updatedAt: Timestamp.fromDate(new Date(new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"}))), updatedBy: user.email }, { merge: true });  
           setAlertVisible(false)
           clearRecipientForm()
         }

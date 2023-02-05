@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react';
 import { setDoc } from 'firebase/firestore'
 import {handleChangeInput,checkEmptyValues,handleChangeSelect} from './handleForm'
 import { UserAuth } from '../../context/authContex';
+import { Timestamp } from "@firebase/firestore";
 import Select from 'react-select';
 const orderid = require('order-id')('key');
 
@@ -56,14 +57,14 @@ export default function MessageForm({visible,handleVisibility}) {
       inputFieldsGlobal[0].id = orderid.generate()
       inputFieldsGlobal[0].messageID = `${inputFieldsGlobal[0].client.clientID}-${inputFieldsGlobal[0].contact.contactID}-${inputFieldsGlobal[0].id }`
       inputFieldsGlobal[0].createdBy = user.email
-      inputFieldsGlobal[0].createdAt = new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"})
+      inputFieldsGlobal[0].createdAt = Timestamp.fromDate(new Date(new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"})))
       console.log(inputFieldsGlobal[0])
       if(checkEmptyValues(inputFieldsGlobal[0]) && inputFieldsGlobal[0].to.match('^[\+][(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4,6}$')){
         await setDoc(doc(db, "messages", inputFieldsGlobal[0].messageID), inputFieldsGlobal[0])
         await setDoc(doc(db, "clients", `${inputFieldsGlobal[0].client.clientID}/messages/${inputFieldsGlobal[0].messageID}`), inputFieldsGlobal[0])
         await setDoc(doc(db, "clients", `${inputFieldsGlobal[0].client.clientID}/contacts/${inputFieldsGlobal[0].contact.contactID}/messages/${inputFieldsGlobal[0].messageID}`), inputFieldsGlobal[0])
         await setDoc(doc(db, "contacts", `${inputFieldsGlobal[0].contact.contactID}/messages/${inputFieldsGlobal[0].messageID}`), inputFieldsGlobal[0])
-        await setDoc(doc(db, "clients", `${inputFieldsGlobal[0].client.clientID}`), { updatedAt: new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"}), updatedBy: user.email }, { merge: true });  
+        await setDoc(doc(db, "clients", `${inputFieldsGlobal[0].client.clientID}`), { updatedAt: Timestamp.fromDate(new Date(new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"}))), updatedBy: user.email }, { merge: true });  
         setAlertVisible(false)
         clearMessageForm()
       }

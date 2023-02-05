@@ -5,6 +5,8 @@ import { setDoc,doc,getCountFromServer, collection, where,query,deleteDoc } from
 import { UserAuth } from '../../context/authContex';
 import Select from 'react-select';
 import {roleOptions} from './handleForm'
+import { Timestamp } from "@firebase/firestore";
+
 const orderid = require('order-id')('key');
 
 
@@ -49,13 +51,13 @@ export function ContactForm({visible, handleVisibility, edit, contact}) {
           setAlertVisible(true)
         }
         else{
-          inputFields[0].updatedAt = new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"})
+          inputFields[0].updatedAt = Timestamp.fromDate(new Date(new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"})))
           inputFields[0].updatedBy = user.email
           if(!edit){
             inputFields[0].id = orderid.generate()
             inputFields[0].contactID = `${inputFields[0].client.clientID}-${inputFields[0].name}-${inputFields[0].id}`
-            inputFields[0].createdAt = new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"})
-            inputFields[0].updatedAt = new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"})
+            inputFields[0].createdAt = Timestamp.fromDate(new Date(new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"})))
+            inputFields[0].updatedAt = Timestamp.fromDate(new Date(new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"})))
           }
           if(checkEmptyValues(inputFields[0]) && inputFields[0].number.match('^[\+][(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4,6}$')){
             if(edit){
@@ -68,8 +70,8 @@ export function ContactForm({visible, handleVisibility, edit, contact}) {
                   client: inputFields[0].client,
                   content:"From Monday to Friday this field should change according to the orders planned the next day",
                   contact:{contactID:inputFields[0].contactID, name:inputFields[0].name,email:inputFields[0].email,number:inputFields[0].number,available:inputFields[0].available},
-                  createdAt:new Date().toLocaleString("sv", { timeZone: "Europe/Berlin" }),
-                  updatedAt:new Date().toLocaleString("sv", { timeZone: "Europe/Berlin" }),
+                  createdAt:Timestamp.fromDate(new Date(new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"}))),
+                  updatedAt:Timestamp.fromDate(new Date(new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"}))),
                 }
                 await setDoc(doc(db, `clients/${inputFields[0].client.clientID}/contacts/${inputFields[0].contactID}/reminders/${inputFields[0].reminderID}`),reminder)
                 await setDoc(doc(db, `contacts/${inputFields[0].contactID}/reminders/${inputFields[0].reminderID}`),reminder)
@@ -84,7 +86,7 @@ export function ContactForm({visible, handleVisibility, edit, contact}) {
                 inputFields[0].reminderID = ""
               }
               await setDoc(doc(db, "clients", `${inputFields[0].client.clientID}/contacts/${inputFields[0].contactID}`), inputFields[0])  
-              await setDoc(doc(db, "clients", `${inputFields[0].client.clientID}`), { updatedAt: new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"}), updatedBy: user.email }, { merge: true });  
+              await setDoc(doc(db, "clients", `${inputFields[0].client.clientID}`), { updatedAt: Timestamp.fromDate(new Date(new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"}))), updatedBy: user.email }, { merge: true });  
               await setDoc(doc(db, "contacts", inputFields[0].contactID), inputFields[0]);
               setAlertVisible(false)
               handleVisibility(false)
@@ -98,8 +100,8 @@ export function ContactForm({visible, handleVisibility, edit, contact}) {
                 client: inputFields[0].client,
                 content:"From Monday to Friday this field should change according to the orders planned the next day",
                 contact:{contactID:inputFields[0].contactID, name:inputFields[0].name,email:inputFields[0].email,number:inputFields[0].number,available:inputFields[0].available},
-                createdAt:new Date().toLocaleString("sv", { timeZone: "Europe/Berlin" }),
-                updatedAt:new Date().toLocaleString("sv", { timeZone: "Europe/Berlin" }),
+                createdAt:Timestamp.fromDate(new Date(new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"}))),
+                updatedAt:Timestamp.fromDate(new Date(new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"}))),
               }
               await setDoc(doc(db, "clients", `${inputFields[0].client.clientID}/contacts/${inputFields[0].contactID}`), inputFields[0])  
               await setDoc(doc(db, "contacts", inputFields[0].contactID), inputFields[0]);
@@ -110,7 +112,7 @@ export function ContactForm({visible, handleVisibility, edit, contact}) {
                 await setDoc(doc(db, `reminders/${reminder.reminderID}`),reminder)
               }
             }
-            await setDoc(doc(db, "clients", `${inputFields[0].client.clientID}`), { updatedAt: new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"}), updatedBy: user.email }, { merge: true });  
+            await setDoc(doc(db, "clients", `${inputFields[0].client.clientID}`), { updatedAt: Timestamp.fromDate(new Date(new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"}))), updatedBy: user.email }, { merge: true });  
             setAlertVisible(false)
             handleVisibility(false)
             clearContactForm()

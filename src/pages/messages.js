@@ -1,5 +1,5 @@
 import db from '../firebase';
-import { collection, onSnapshot} from 'firebase/firestore';
+import { collection, onSnapshot, query, orderBy} from 'firebase/firestore';
 import { useEffect, useState } from 'react';
 import Table from '../components/table';
 import MessageForm from '../components/forms/messageForm';
@@ -16,20 +16,17 @@ export function Messages() {
   
   useEffect(() => {
     const colRef1 = collection(db, "clients" )
-    const colRef = collection(db, "messages" )
+    const colRef = collection(db, "messages" )  
+    const q = query(colRef, orderBy("deliveryAt", "desc"));
     const colRef2 = collection(db, "reminders" )
     let isMounted = true;
     //real time update
-    onSnapshot(colRef, (snapshot) => {
+    onSnapshot(q, (snapshot) => {
         setData([])
         if (isMounted) {
           snapshot.docs.forEach((doc) => {
             setData((prev) => [ doc.data() , ...prev])
           })
-          data.sort(function(a,b){
-            return new Date(b["createdAt"]) - new Date(a["createdAt"])
-          })
-          setData(data)
         }
     })
     onSnapshot(colRef2, (snapshot) => {
@@ -56,19 +53,7 @@ export function Messages() {
     }; 
   }, [])
 
-  function compareTimeStamp(rowA, rowB, id, desc) {
-    let a = rowA.values[id].toDate().toLocaleString("sv", { timeZone: "Europe/Berlin"});
-    let b = rowB.values[id].toDate().toLocaleString("sv", { timeZone: "Europe/Berlin"});
-    if (!a || a.length < 0) {  // Blanks and non-numeric strings to bottom
-        a = desc ? Number.NEGATIVE_INFINITY : Number.POSITIVE_INFINITY;
-    }
-    if (!b || b.length < 0) {  // Blanks and non-numeric strings to bottom
-      b = desc ? Number.NEGATIVE_INFINITY : Number.POSITIVE_INFINITY;
-  }
-    if (a > b) return 1; 
-    if (a < b) return -1;
-    return 0;
-}
+
 
   const columns = [
     {
@@ -92,7 +77,6 @@ export function Messages() {
       accessor: "createdAt",
       id: "createdAt",
       Cell: DateField,
-      sortType: compareTimeStamp
     },
     {
         Header: "Delivery State",

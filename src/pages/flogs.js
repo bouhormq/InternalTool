@@ -4,21 +4,18 @@ import db from '../firebase';
 import { collection, onSnapshot, query, orderBy,where } from 'firebase/firestore';
 import { useEffect, useState } from 'react';
 import { DateField, ItemsField, ActionFlow,StatusPill } from '../components/tableCells';
-import plus from "../media/plus-white.png"
-import { FlowsForm } from '../components/forms/flowsForm';
 import React from 'react';
 
 
-export function Flows() {
+export function FLogs() {
   const [incoming, setIncoming] = useState([]);
   const [outgoing, setOutgoing] = useState([]);
-  const [type, setType] = useState();
-  const [visible, setVisible] = useState(false);
+
   
   useEffect(() => {
     const colRef1 = collection(db, "flows" )
-    const q1 = query(colRef1, where("direction", "==", "outgoing"),where("fulfillmentStatus", "==", "open"), orderBy("deliveryAt", "desc"));
-    const q2 = query(colRef1, where("direction", "==", "incoming"),where("fulfillmentStatus", "==", "open"), orderBy("deliveryAt", "desc"));
+    const q1 = query(colRef1, where("direction", "==", "outgoing"), where("fulfillmentStatus", "in", ["cancelled","success","failure"]), orderBy("deliveryAt"));
+    const q2 = query(colRef1, where("direction", "==", "incoming"), where("fulfillmentStatus", "in", ["cancelled","success","failure"]), orderBy("deliveryAt"));
 
     let isMounted = true;
     onSnapshot(q1, (snapshot) => {
@@ -71,7 +68,7 @@ export function Flows() {
       Cell: DateField, // new
     },{
       Header: "Recipient",
-      accessor: "recipient",
+      accessor: "recipient.name",
       id: "recipient",
     },
     {
@@ -108,25 +105,18 @@ export function Flows() {
       accessor: "comments",
       id: "comments",
     },{
+      Header: "Cancel Reason",
+      accessor: "cancelReason",
+      id: "cancelReason",
+    },{
       Header: "Invoice Stamp",
       accessor: "invoiceStamp",
       id: "invoiceStamp",
       Cell: DateField, // new
     }
   ]
-  const handleVisibility = async (visibility,newtype) => {
-    // 👇️ take parameter passed from Child component
-     await setType(newtype)
-     await setVisible(visibility);
-  };
 
-  const AddButton = ({newtype}) => {
-   return(
-    <button onClick={() => handleVisibility(true,newtype)} type="button" class="text-white bg-blue-700 hover:bg-blue-800 focus:outline-none focus:ring-4 focus:ring-blue-300 font-medium rounded-full text-sm px-4 py-2  text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
-        Add
-    </button>
-   )
-  }
+
   
   return (
     <div class="container mx-auto">
@@ -135,16 +125,15 @@ export function Flows() {
                 <span class="relative top-1.5 ml-3 inline-block align-baseline text-5xl font-bold text-gray-700 -z-10">Outgoing 🚚 🔜</span>
               </div>
           <div className="mt-5">
-            <Table columns={columns} data={outgoing} button={<AddButton newtype="outgoing"/>} />
+            <Table columns={columns} data={outgoing} />
           </div>
           </div>
           <div className="mb-6">
             <span  class="relative top-1.5 ml-3 inline-block align-baseline text-5xl font-bold text-gray-700 -z-10">Incoming 🚚 🔙</span>
           </div>
           <div className="mt-5">
-            <Table  columns={columns} data={incoming} button={<AddButton newtype="incoming"/>}/>
+            <Table  columns={columns} data={incoming} />
           </div>
-          <FlowsForm handleVisibility={handleVisibility} visible={visible} direction={type} key={type} edit={false}/>
         </div>  
   );
 }

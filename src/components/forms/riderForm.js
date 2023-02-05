@@ -4,6 +4,7 @@ import db from '../../firebase'
 import { useEffect, useState } from 'react'
 import { setDoc, getCountFromServer, query, collection, where } from 'firebase/firestore'
 import { UserAuth } from '../../context/authContex'
+import { Timestamp } from "@firebase/firestore";
 const orderid = require('order-id')('key');
 
 
@@ -49,10 +50,10 @@ export default function RiderForm({ visible, handleVisibility,edit,rider }) {
       if(!edit){
         inputFieldsGlobal[0].id = orderid.generate()
         inputFieldsGlobal[0].riderID = `${inputFieldsGlobal[0].email}-${inputFieldsGlobal[0].id}`
-        inputFieldsGlobal[0].createdAt = new Date().toLocaleString("sv", { timeZone: "Europe/Berlin" })
+        inputFieldsGlobal[0].createdAt = Timestamp.fromDate(new Date(new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"})))
         inputFieldsGlobal[0].createdBy = user.email
       }
-      inputFieldsGlobal[0].updatedAt = new Date().toLocaleString("sv", { timeZone: "Europe/Berlin" })
+      inputFieldsGlobal[0].updatedAt = Timestamp.fromDate(new Date(new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"})))
       inputFieldsGlobal[0].updatedBy = user.email
       const snap = await getCountFromServer(query(
         collection(db, 'riders'), where("name", '==', inputFieldsGlobal[0].name), where("lastName", '==', inputFieldsGlobal[0].lastName),where("number", '==', inputFieldsGlobal[0].number)

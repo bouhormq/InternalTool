@@ -1,6 +1,7 @@
 import { collection, getDocs,query, setDoc, doc, getDoc, deleteDoc, where } from 'firebase/firestore';
 import { handleOrderFlow } from '../tableCells';
 import { UserAuth } from '../../context/authContex';
+import { Timestamp } from "@firebase/firestore";
 import db from '../../firebase'
 const orderid = require('order-id')('key');
 
@@ -16,9 +17,9 @@ export const tosOptions = [
   {value:"Instant",label:"Instant"}]
 
 export const frequencyOptions = [
-  {value:"Weekly",label:"Weekly"},
+  {value:"Weekly",label:"Weekly"}/*,
   {value:"Bi-Weekly",label:"Bi-Weekly"},
-  {value:"Monthly",label:"Monthly"}
+  {value:"Monthly",label:"Monthly"}*/
  ]
 
  export const roleOptions = [
@@ -101,7 +102,7 @@ export const contractLengthOptions = [
       inputFields["daysOfWeek"]=[];
       if(inputFields.tos === "Instant"){
         setVisibleTimeField(false)
-        inputFields["deliveryAt"] = new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"})
+        inputFields["deliveryAt"] = Timestamp.fromDate(new Date(new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"})))
       }
     }
     else{
@@ -324,14 +325,14 @@ export async function deliveryToFlow(delivery,exchange,user){
       contact: delivery.contact,
       totalPrice: delivery.totalPrice,
       financialStatus: delivery.financialStatus,
-      createdAt: new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"}),
+      createdAt: Timestamp.fromDate(new Date(new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"}))),
       createdBy: user.email,
-      cancelledAt: new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"}),
+      cancelledAt: Timestamp.fromDate(new Date(new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"}))),
       cancelledBy: delivery.cancelledBy,
       cancelReason: delivery.cancelReason,
       assignedWarehouse: delivery.assignedWarehouse,
-      updatedAt: new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"}),
-      updatedBy:new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"}),
+      updatedAt: Timestamp.fromDate(new Date(new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"}))),
+      updatedBy:Timestamp.fromDate(new Date(new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"}))),
       fulfillmentStatus: delivery.fulfillmentStatus,
       lineItems: delivery.lineItems,
       flowID: `D-O-${delivery.deliveryID}`,
@@ -366,14 +367,14 @@ export async function deliveryToFlow(delivery,exchange,user){
       contact: delivery.contact,
       totalPrice: delivery.totalPrice,
       financialStatus: delivery.financialStatus,
-      createdAt: new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"}),
+      createdAt: Timestamp.fromDate(new Date(new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"}))),
       createdBy: user.email,
-      cancelledAt: new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"}),
+      cancelledAt: Timestamp.fromDate(new Date(new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"}))),
       cancelledBy: delivery.cancelledBy,
       cancelReason: delivery.cancelReason,
       assignedWarehouse: delivery.assignedWarehouse,
-      updatedAt: new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"}),
-      updatedBy:new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"}),
+      updatedAt: Timestamp.fromDate(new Date(new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"}))),
+      updatedBy:Timestamp.fromDate(new Date(new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"}))),
       fulfillmentStatus: delivery.fulfillmentStatus,
       lineItems: delivery.lineItems,
       flowID: `D-R-${delivery.deliveryID}`,
@@ -405,11 +406,11 @@ export async function deliveryToFlow(delivery,exchange,user){
       contact: delivery.contact,
       totalPrice: delivery.totalPrice,
       financialStatus: delivery.financialStatus,
-      createdAt: new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"}),
+      createdAt: Timestamp.fromDate(new Date(new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"}))),
       createdBy: user.email,
       assignedWarehouse: delivery.assignedWarehouse,
-      updatedAt: new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"}),
-      updatedBy:new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"}),
+      updatedAt: Timestamp.fromDate(new Date(new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"}))),
+      updatedBy:Timestamp.fromDate(new Date(new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"}))),
       fulfillmentStatus: delivery.fulfillmentStatus,
       lineItems: delivery.lineItems,
       flowID: flowID,

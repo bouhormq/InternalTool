@@ -3,6 +3,8 @@ import db from '../../firebase'
 import { useState } from 'react'
 import { setDoc,doc } from 'firebase/firestore';
 import { UserAuth } from '../../context/authContex';
+import { Timestamp } from "@firebase/firestore";
+
 import addCalendarEvent from '../../gapi'
 import {addMinutes, publishTheCalenderEvent,deleteSeries,updateLineItemStats,validateContact, handleSkuForm, handleChangeCheckbox, handleRemoveFields, handleAddFields,handleChangeSelect, tosOptions, frequencyOptions, contractLengthOptions, SchedulingVisibility} from './handleForm';
 import  Select  from 'react-select';
@@ -108,22 +110,21 @@ export function DeliveryForm({visible,handleVisibility,type,edit,delivery}) {
   
 
   async function handleSubmit(editSeries){
-    console.log(inputFieldsGlobal[0])
     if (checkEmptyValues(inputFieldsGlobal[0])) {
       setAlertVisible(false)
       handleVisibility(false)
       if(editSeries) deleteSeries(delivery);
       setInputFieldsGlobal(updateLineItemStats(inputFieldsGlobal[0].lineItems,inputFieldsGlobal[0]))
-      inputFieldsGlobal[0].updatedAt = new Date().toLocaleString("sv", { timeZone: "Europe/Berlin" })
+      inputFieldsGlobal[0].updatedAt = Timestamp.fromDate(new Date(new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"})))
       inputFieldsGlobal[0].updatedBy = user.email
       if(inputFieldsGlobal[0].tos === "Jour Fix" || !edit || (edit && editSeries)) {
-        inputFieldsGlobal[0].createdAt = new Date().toLocaleString("sv", { timeZone: "Europe/Berlin" })
+        inputFieldsGlobal[0].createdAt = Timestamp.fromDate(new Date(new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"})))
         inputFieldsGlobal[0].createdBy = user.email
       }
       if (inputFieldsGlobal[0].tos !== "Jour Fix") {
         inputFieldsGlobal[0].seriesID = ""
         if(!edit || (edit && editSeries))  inputFieldsGlobal[0].id = orderid.generate()
-        if(inputFieldsGlobal[0].tos === "Instant") inputFieldsGlobal[0].deliveryAt = new Date().toLocaleString("sv", { timeZone: "Europe/Berlin" });
+        if(inputFieldsGlobal[0].tos === "Instant") inputFieldsGlobal[0].deliveryAt = Timestamp.fromDate(new Date(new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"})));
         if (inputFieldsGlobal[0].type === "Order") {
           if(!edit || (edit && editSeries))  inputFieldsGlobal[0].deliveryID = `${inputFieldsGlobal[0].client.clientID}-${inputFieldsGlobal[0].recipient.recipientID}-${inputFieldsGlobal[0].id}`
           /*if(!edit){
@@ -195,8 +196,10 @@ export function DeliveryForm({visible,handleVisibility,type,edit,delivery}) {
       }
       else {
         function addMonths(numOfMonths, date) {
-          date.setMonth(date.getMonth() + numOfMonths);
-          return date;
+          var  aux = new Date(date)
+          aux.setMonth(date.getMonth() + numOfMonths);
+
+          return aux;
         }
         function getDatesInRange(startDate, endDate) {
           const date = new Date(startDate.getTime());
@@ -211,59 +214,44 @@ export function DeliveryForm({visible,handleVisibility,type,edit,delivery}) {
           return dates;
         }
         let seriesID = orderid.generate()
-        let endDate = addMonths(parseInt(inputFieldsGlobal[0].contractLength.substring(0, 2)), new Date(inputFieldsGlobal[0].deliveryAt))
-        let startDate = new Date(inputFieldsGlobal[0].deliveryAt)
+        var startDate =  new Date(inputFieldsGlobal[0].deliveryAt.seconds*1000)
+        let endDate = addMonths(parseInt(inputFieldsGlobal[0].contractLength.substring(0, 2)), startDate)
         // Usage
-        const auxdates = getDatesInRange(startDate, endDate)
-        var dates = []
-        var interval = 1
-        if(inputFieldsGlobal[0].frequency === "Bi-Weekly") interval = 1
-        if(inputFieldsGlobal[0].frequency === "Monthly") interval = 4
-        if(inputFieldsGlobal[0].frequency !== "Weekly"){
-          for(var i = 0 ; i*7 < auxdates.length; i++){
-            if(i%interval === 0) dates.push(...auxdates.slice(0+(i*7),6+(i*7)))
-            console.log(i,i%interval,i*7)
-          }
-        }
-        else{
-          dates = auxdates
-        }
-        console.log(dates.length)
+        const dates = getDatesInRange(startDate, endDate)
         let send = false
         for (let i = 0; i < dates.length; i++) {
           var date = new Date(dates[i])
-          if (date.getDay() === 0 && inputFieldsGlobal[0].daysOfWeek.includes('sunday')) {
-            inputFieldsGlobal[0].deliveryAt = date.toLocaleString("sv", { timeZone: "Europe/Berlin" })
+          if (dates[i].getDay() === 0 && inputFieldsGlobal[0].daysOfWeek.includes('sunday')) {
+            inputFieldsGlobal[0].deliveryAt = Timestamp.fromDate(new Date(date))
             send = true
           }
-          else if (date.getDay() === 1 && inputFieldsGlobal[0].daysOfWeek.includes('monday')) {
-            inputFieldsGlobal[0].deliveryAt = date.toLocaleString("sv", { timeZone: "Europe/Berlin" })
+          else if (dates[i].getDay() === 1 && inputFieldsGlobal[0].daysOfWeek.includes('monday')) {
+            inputFieldsGlobal[0].deliveryAt = Timestamp.fromDate(new Date(date))
             send = true
           }
-          else if (date.getDay() === 2 && inputFieldsGlobal[0].daysOfWeek.includes('tuesday')) {
-            inputFieldsGlobal[0].deliveryAt = date.toLocaleString("sv", { timeZone: "Europe/Berlin" })
+          else if (dates[i].getDay() === 2 && inputFieldsGlobal[0].daysOfWeek.includes('tuesday')) {
+            inputFieldsGlobal[0].deliveryAt = Timestamp.fromDate(new Date(date))
             send = true
           }
-          else if (date.getDay() === 3 && inputFieldsGlobal[0].daysOfWeek.includes('wednesday')) {
-            inputFieldsGlobal[0].deliveryAt = date.toLocaleString("sv", { timeZone: "Europe/Berlin" })
+          else if (dates[i].getDay() === 3 && inputFieldsGlobal[0].daysOfWeek.includes('wednesday')) {
+            inputFieldsGlobal[0].deliveryAt = Timestamp.fromDate(new Date(date))
             send = true
           }
-          else if (date.getDay() === 4 && inputFieldsGlobal[0].daysOfWeek.includes('thursday')) {
-            inputFieldsGlobal[0].deliveryAt = date.toLocaleString("sv", { timeZone: "Europe/Berlin" })
+          else if (dates[i].getDay() === 4 && inputFieldsGlobal[0].daysOfWeek.includes('thursday')) {
+            inputFieldsGlobal[0].deliveryAt = Timestamp.fromDate(new Date(date))
             send = true
           }
-          else if (date.getDay() === 5 && inputFieldsGlobal[0].daysOfWeek.includes('friday')) {
-            inputFieldsGlobal[0].deliveryAt = date.toLocaleString("sv", { timeZone: "Europe/Berlin" })
+          else if (dates[i].getDay() === 5 && inputFieldsGlobal[0].daysOfWeek.includes('friday')) {
+            inputFieldsGlobal[0].deliveryAt = Timestamp.fromDate(new Date(date))
             send = true
           }
-          else if (date.getDay() === 6 && inputFieldsGlobal[0].daysOfWeek.includes('saturday')) {
-            inputFieldsGlobal[0].deliveryAt = date.toLocaleString("sv", { timeZone: "Europe/Berlin" })
+          else if (dates[i].getDay() === 6 && inputFieldsGlobal[0].daysOfWeek.includes('saturday')) {
+            inputFieldsGlobal[0].deliveryAt = Timestamp.fromDate(new Date(date))
             send = true
           }
-          console.log("number", date.getDay(),send)
           if (send) {
-            if(!edit || (edit && editSeries))  inputFieldsGlobal[0].seriesID = seriesID
-            if(!edit || (edit && editSeries))  inputFieldsGlobal[0].id = orderid.generate()
+            if(!edit || (edit && editSeries)) inputFieldsGlobal[0].seriesID = seriesID
+            if(!edit || (edit && editSeries)) inputFieldsGlobal[0].id = orderid.generate()
             if (inputFieldsGlobal[0].type === "Order") {
               inputFieldsGlobal[0].deliveryID = `${inputFieldsGlobal[0].client.clientID}-${inputFieldsGlobal[0].recipient.recipientID}-${inputFieldsGlobal[0].id}`
               await setDoc(doc(db, "orders", inputFieldsGlobal[0].deliveryID), inputFieldsGlobal[0]);
@@ -280,13 +268,11 @@ export function DeliveryForm({visible,handleVisibility,type,edit,delivery}) {
             }
             send = false
           }
-          if(inputFieldsGlobal[0].frequency === "Bi-Weekly" && i%6 === 0) i = i + 6;
-          if(inputFieldsGlobal[0].frequency === "Montly" && i%29 === 0) i = i + 29;
         }
       }
-      await setDoc(doc(db, "clients", `${inputFieldsGlobal[0].client.clientID}`), { updatedAt: new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"}), updatedBy: user.email }, { merge: true }); 
-      await setDoc(doc(db, "clients", `${inputFieldsGlobal[0].client.clientID}/contacts/${inputFieldsGlobal[0].contact.contactID}`), { updatedAt: new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"}), updatedBy: user.email }, { merge: true }); 
-      await setDoc(doc(db, "contacts", `${inputFieldsGlobal[0].contact.contactID}`), { updatedAt: new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"}), updatedBy: user.email }, { merge: true });
+      await setDoc(doc(db, "clients", `${inputFieldsGlobal[0].client.clientID}`), { updatedAt: Timestamp.fromDate(new Date(new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"}))), updatedBy: user.email }, { merge: true }); 
+      await setDoc(doc(db, "clients", `${inputFieldsGlobal[0].client.clientID}/contacts/${inputFieldsGlobal[0].contact.contactID}`), { updatedAt: Timestamp.fromDate(new Date(new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"}))), updatedBy: user.email }, { merge: true }); 
+      await setDoc(doc(db, "contacts", `${inputFieldsGlobal[0].contact.contactID}`), { updatedAt: Timestamp.fromDate(new Date(new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"}))), updatedBy: user.email }, { merge: true });
       clearDeliveryForm()
     }
     else {
@@ -369,7 +355,7 @@ export function DeliveryForm({visible,handleVisibility,type,edit,delivery}) {
 
   const handleChangeInputFieldsGlobal = async (event) => {    
     const newInputFieldsGlobal = inputFieldsGlobal.map(i => {
-      i[event.target.name] = event.target.value.trim()
+      i[event.target.name] = Timestamp.fromDate(new Date(event.target.value)) 
       return i;
     })
     setInputFieldsGlobal(newInputFieldsGlobal)
@@ -523,7 +509,7 @@ export function DeliveryForm({visible,handleVisibility,type,edit,delivery}) {
                       }
                       <div>
                           <label for="invoiceStamp" class="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-300">Invoice Stamp</label>
-                          <input  name="invoiceStamp" type="datetime-local" value={inputFieldsGlobal[0].invoiceStamp} onChange={event => handleChangeInputFieldsGlobal(event)} id="invoiceStamp" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Select date"/>
+                          <input  name="invoiceStamp" type="datetime-local" key={inputFieldsGlobal[0].invoiceStamp} value={inputFieldsGlobal[0].invoiceStamp.seconds ? new Date(inputFieldsGlobal[0].invoiceStamp.seconds*1000).toISOString().replace(":00.000Z", "") : ""} onChange={event => handleChangeInputFieldsGlobal(event)} id="invoiceStamp" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Select date"/>
                       </div>
                       <div>
                         <label for="tos" class="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-300">TOS</label>
@@ -540,7 +526,7 @@ export function DeliveryForm({visible,handleVisibility,type,edit,delivery}) {
                       </div> 
                       <div>
                           <label style={{visibility: visibleTimeField  ? 'visible' : 'hidden' }} for="deliveryAt" class="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-300">Delivery At </label>
-                          <input style={{visibility: visibleTimeField  ? 'visible' : 'hidden' }} value={inputFieldsGlobal[0].deliveryAt} onChange={event => handleChangeInputFieldsGlobal(event)} id="deliveryAt" name="deliveryAt" type="datetime-local" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Select date"/>
+                          <input style={{visibility: visibleTimeField  ? 'visible' : 'hidden' }} key={inputFieldsGlobal[0].deliveryAt} value={inputFieldsGlobal[0].deliveryAt.seconds ? new Date(inputFieldsGlobal[0].deliveryAt.seconds*1000).toISOString().replace(":00.000Z", "") : ""} onChange={event => handleChangeInputFieldsGlobal(event)} id="deliveryAt" name="deliveryAt" type="datetime-local" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Select date"/>
                       </div>  
                       <div> 
                         <label style={{visibility: visibleFrequencyField  ? 'visible' : 'hidden' }} for="frequency" class="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-300">Frequency</label>
