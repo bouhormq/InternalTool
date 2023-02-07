@@ -447,25 +447,22 @@ export function MessageAlert({ handleVisibility, visible, delivery }) {
 export  async function handleOrderFlow(delivery, type, user){
   console.log(delivery)
   for (let i = 0; i < delivery.lineItems.length; ++i) {
-    console.log("0")
     const docRef = doc(db, "inventory", delivery.lineItems[i].inventoryID);
     const docSnap = await getDoc(docRef);
-    console.log("1")
     if (docSnap.exists()) {
-      console.log("2")
       let product = docSnap.data()
-      console.log(product,delivery.type,delivery,type)
       if (type === "incoming") {
         product.inventory[delivery.assignedWarehouse].inventoryQuantity = product.inventory[delivery.assignedWarehouse].inventoryQuantity + delivery.lineItems[i].quantity
         product.inventoryTotalStock = product.inventoryTotalStock + delivery.lineItems[i].quantity
       }
       else if (type === "outgoing") {
-        console.log("3")
+        console.log(product,delivery.type,delivery,type)
+        console.log(product.inventory[delivery.assignedWarehouse].inventoryQuantity,product.inventoryTotalStock,delivery.lineItems[i].quantity)
         product.inventory[delivery.assignedWarehouse].inventoryQuantity = product.inventory[delivery.assignedWarehouse].inventoryQuantity - delivery.lineItems[i].quantity
         product.inventoryTotalStock = product.inventoryTotalStock - delivery.lineItems[i].quantity
+        console.log(product.inventory[delivery.assignedWarehouse].inventoryQuantity,product.inventoryTotalStock,delivery.lineItems[i].quantity)
+        console.log(product,delivery.type,delivery,type)
       }
-      console.log("4")
-      console.log(product,delivery.type,delivery,type)
       product.updatedAt = Timestamp.fromDate(new Date(new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"})))
       product.updatedBy = user.email
       await setDoc(doc(db, "inventory", delivery.lineItems[i].inventoryID), product)
@@ -481,7 +478,7 @@ async function goBack(delivery,user) {
   let oldStatus = delivery.fulfillmentStatus
   if (delivery.type === "Order") {
     if (oldStatus === "success") {
-      handleOrderFlow(delivery, "incoming",user)
+      await handleOrderFlow(delivery, "incoming",user)
       await deleteDoc(doc(db, "riders", `${delivery.rider.riderID}/orders/${delivery.deliveryID}`));
     }
     await deleteDoc(doc(db, "flows", `D-O-${delivery.deliveryID}`));
@@ -520,7 +517,7 @@ async function goBack(delivery,user) {
   }
   else if (delivery.type === "Return") {
     if (oldStatus === "success" ) {
-      handleOrderFlow(delivery, "outgoing",user)
+      await handleOrderFlow(delivery, "outgoing",user)
       await deleteDoc(doc(db, "riders", `${delivery.rider.riderID}/returns/${delivery.deliveryID}`));
     }
     await deleteDoc(doc(db, "flows", `D-R-${delivery.deliveryID}`));
