@@ -454,6 +454,7 @@ export  async function handleOrderFlow(delivery, type, user){
     if (docSnap.exists()) {
       console.log("2")
       let product = docSnap.data()
+      console.log(product,delivery.type,type)
       if (type === "incoming") {
         product.inventory[delivery.assignedWarehouse].inventoryQuantity = product.inventory[delivery.assignedWarehouse].inventoryQuantity + delivery.lineItems[i].quantity
         product.inventoryTotalStock = product.inventoryTotalStock + delivery.lineItems[i].quantity
@@ -464,6 +465,7 @@ export  async function handleOrderFlow(delivery, type, user){
         product.inventoryTotalStock = product.inventoryTotalStock - delivery.lineItems[i].quantity
       }
       console.log("4")
+      console.log(product,delivery.type,type)
       product.updatedAt = Timestamp.fromDate(new Date(new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"})))
       product.updatedBy = user.email
       await setDoc(doc(db, "inventory", delivery.lineItems[i].inventoryID), product)
