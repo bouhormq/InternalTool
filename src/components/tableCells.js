@@ -456,12 +456,7 @@ export  async function handleOrderFlow(delivery, type, user){
         product.inventoryTotalStock = product.inventoryTotalStock + delivery.lineItems[i].quantity
       }
       else if (type === "outgoing") {
-        console.log(product,delivery.type,delivery,type)
-        console.log(product.inventory[delivery.assignedWarehouse].inventoryQuantity,product.inventoryTotalStock,delivery.lineItems[i].quantity)
-        product.inventory[delivery.assignedWarehouse].inventoryQuantity = product.inventory[delivery.assignedWarehouse].inventoryQuantity - delivery.lineItems[i].quantity
         product.inventoryTotalStock = product.inventoryTotalStock - delivery.lineItems[i].quantity
-        console.log(product.inventory[delivery.assignedWarehouse].inventoryQuantity,product.inventoryTotalStock,delivery.lineItems[i].quantity)
-        console.log(product,delivery.type,delivery,type)
       }
       product.updatedAt = Timestamp.fromDate(new Date(new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"})))
       product.updatedBy = user.email
