@@ -17,7 +17,7 @@ export function Messages() {
   useEffect(() => {
     const colRef1 = collection(db, "clients" )
     const colRef = collection(db, "messages" )  
-    const q = query(colRef, orderBy("deliveryAt", "desc"));
+    const q = query(colRef, orderBy("createdAt", "desc"));
     const colRef2 = collection(db, "reminders" )
     let isMounted = true;
     //real time update
