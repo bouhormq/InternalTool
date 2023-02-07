@@ -74,8 +74,8 @@ export function Messages() {
     },
     {
       Header: "Delivery Date",
-      accessor: "updatedAt",
-      id: "updatedAt",
+      accessor: "createdAt",
+      id: "createdAt",
       Cell: DateField,
     },
     {
@@ -95,8 +95,8 @@ export function Messages() {
     },
     {
       Header: "Sent At",
-      accessor: "createdAt",
-      id: "createdAt",
+      accessor: "updatedAt",
+      id: "updatedAt",
       Cell: DateField
     },
     {
