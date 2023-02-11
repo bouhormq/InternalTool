@@ -324,8 +324,8 @@ export function RecipientForm({visible, handleVisibility, edit, recipient}) {
                             />
                     </div> 
                     <div >
-                        <label for="shippingAddress.address" class="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-300">Address</label>
-                        <input type="text" value={inputFields[0].shippingAddress.address} onChange={event => handleChangeInput(event.target,'shippingAddress.address',inputFields[0]).then(function(value){setInputFields(value)})}  name="shippingAddress.address" id="shippingAddress.address" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Finkenhofstraße 12, 60322 Frankfurt am Main, Germany" required=""/>
+                        <label for="shippingAddress.address" class="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-300">Street And Number</label>
+                        <input type="text" value={inputFields[0].shippingAddress.address} onChange={event => handleChangeInput(event.target,'shippingAddress.address',inputFields[0]).then(function(value){setInputFields(value)})}  name="shippingAddress.address" id="shippingAddress.address" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Finkenhofstraße 12" required=""/>
                     </div>      
                     </div>
                     <button type="submit" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">Save</button>
