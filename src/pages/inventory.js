@@ -70,12 +70,12 @@ export function Inventory() {
           id: "inventoryTotalStock",
           Cell: StatusPillTotalInventory, // new
         },
-        {
+        /*{
           Header: "Inventory per Warehouse",
           accessor: "inventory",
           id: "inventory",
           Cell: ({ cell: { value } }) => <StatusPillInventory value={value} warehouses={warehouses} />   
-        },
+        },*/
         {
           Header: "Created At",
           accessor: "createdAt",
