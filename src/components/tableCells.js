@@ -1312,6 +1312,7 @@ export function StatusPillInventory({ value, warehouses }) {
   return (
     <>
       {Object.keys(warehouses).map((warehouse, idx) => {
+    if(warehouse){
         return (
           <span
             key={idx}
@@ -1327,7 +1328,7 @@ export function StatusPillInventory({ value, warehouses }) {
             {warehouse + "-[" + value[warehouse].shelf.join(',') + "]: " + value[warehouse].inventoryQuantity}
           </span>
         );
-      })}
+      })}}
     </>
   );
 }
