@@ -1325,7 +1325,7 @@ export function StatusPillInventory({ value, warehouses }) {
               )
             }
           >
-            {warehouse + "-[" + value[warehouse].shelf.join(',') + "]: " + value[warehouse].inventoryQuantity}
+            {warehouse + "-[" + value[warehouse].shelf.join(',') + "]: "}
           </span>
         );
       }})}
