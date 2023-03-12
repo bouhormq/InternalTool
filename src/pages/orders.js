@@ -26,7 +26,6 @@ export function Orders() {
             setData((prev) => [ doc.data() , ...prev])
           })
         }
-      console.log(data)
     })  
     return () => {
       isMounted = false;
@@ -124,6 +123,7 @@ export function Orders() {
 
   const handleVisibility = visibility => {
     // 👇️ take parameter passed from Child component
+    console.log(data)
     setVisible(visibility);
   };
   const AddButton = () => {
