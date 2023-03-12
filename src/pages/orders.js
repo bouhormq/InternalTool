@@ -26,7 +26,7 @@ export function Orders() {
             setData((prev) => [ doc.data() , ...prev])
           })
         }
-
+      console.log(data)
     })  
     return () => {
       isMounted = false;
