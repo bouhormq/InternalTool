@@ -31,7 +31,6 @@ function App() {
           <Navbar/>
           <Routes>
           <Route path='/' element={<Home/>} />
-          <Route element={<Protected/>}>
             <Route path="orders" element={<Orders/>}/>
             <Route path="returns" element={<Returns/>}/>
             <Route path="exchanges" element={<Exchanges/>}/>
@@ -46,7 +45,6 @@ function App() {
             <Route path="messages" element={<Messages/>}/>
             <Route path="riders" element={<Riders/>}/>
             <Route path="calendar" element={<Calendars/>}/>
-          </Route>
           </Routes>
         </Router>
         <div id="signInDiv"></div>
