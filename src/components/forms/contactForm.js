@@ -27,8 +27,8 @@ export function ContactForm({visible, handleVisibility, edit, contact}) {
         available: true,
         updatedAt: "",
         createdAt: "",
-        updatedBy: user.email,
-        createdBy: user.email,
+        updatedBy: "test@email.com",
+        createdBy: "test@email.com",
         role: "",
         reminderID: ""
       }]);
@@ -52,7 +52,7 @@ export function ContactForm({visible, handleVisibility, edit, contact}) {
         }
         else{
           inputFields[0].updatedAt = Timestamp.fromDate(new Date(new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"})))
-          inputFields[0].updatedBy = user.email
+          inputFields[0].updatedBy = "test@email.com"
           if(!edit){
             inputFields[0].id = orderid.generate()
             inputFields[0].contactID = `${inputFields[0].client.clientID}-${inputFields[0].name}-${inputFields[0].id}`
@@ -86,7 +86,7 @@ export function ContactForm({visible, handleVisibility, edit, contact}) {
                 inputFields[0].reminderID = ""
               }
               await setDoc(doc(db, "clients", `${inputFields[0].client.clientID}/contacts/${inputFields[0].contactID}`), inputFields[0])  
-              await setDoc(doc(db, "clients", `${inputFields[0].client.clientID}`), { updatedAt: Timestamp.fromDate(new Date(new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"}))), updatedBy: user.email }, { merge: true });  
+              await setDoc(doc(db, "clients", `${inputFields[0].client.clientID}`), { updatedAt: Timestamp.fromDate(new Date(new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"}))), updatedBy: "test@email.com" }, { merge: true });  
               await setDoc(doc(db, "contacts", inputFields[0].contactID), inputFields[0]);
               setAlertVisible(false)
               handleVisibility(false)
@@ -112,7 +112,7 @@ export function ContactForm({visible, handleVisibility, edit, contact}) {
                 await setDoc(doc(db, `reminders/${reminder.reminderID}`),reminder)
               }
             }
-            await setDoc(doc(db, "clients", `${inputFields[0].client.clientID}`), { updatedAt: Timestamp.fromDate(new Date(new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"}))), updatedBy: user.email }, { merge: true });  
+            await setDoc(doc(db, "clients", `${inputFields[0].client.clientID}`), { updatedAt: Timestamp.fromDate(new Date(new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"}))), updatedBy: "test@email.com" }, { merge: true });  
             setAlertVisible(false)
             handleVisibility(false)
             clearContactForm()
@@ -135,8 +135,8 @@ export function ContactForm({visible, handleVisibility, edit, contact}) {
           available: true,
           updatedAt: "",
           createdAt: "",
-          updatedBy: user.email,
-          createdBy: user.email,
+          updatedBy: "test@email.com",
+          createdBy: "test@email.com",
           role: "",
           reminderID: ""
         }])
