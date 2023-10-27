@@ -56,7 +56,7 @@ export default function MessageForm({visible,handleVisibility}) {
       e.preventDefault();
       inputFieldsGlobal[0].id = orderid.generate()
       inputFieldsGlobal[0].messageID = `${inputFieldsGlobal[0].client.clientID}-${inputFieldsGlobal[0].contact.contactID}-${inputFieldsGlobal[0].id }`
-      inputFieldsGlobal[0].createdBy = user.email
+      inputFieldsGlobal[0].createdBy = "test@email.com"
       inputFieldsGlobal[0].createdAt = Timestamp.fromDate(new Date(new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"})))
       console.log(inputFieldsGlobal[0])
       if(checkEmptyValues(inputFieldsGlobal[0]) && inputFieldsGlobal[0].to.match('^[\+][(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4,6}$')){
@@ -64,7 +64,7 @@ export default function MessageForm({visible,handleVisibility}) {
         await setDoc(doc(db, "clients", `${inputFieldsGlobal[0].client.clientID}/messages/${inputFieldsGlobal[0].messageID}`), inputFieldsGlobal[0])
         await setDoc(doc(db, "clients", `${inputFieldsGlobal[0].client.clientID}/contacts/${inputFieldsGlobal[0].contact.contactID}/messages/${inputFieldsGlobal[0].messageID}`), inputFieldsGlobal[0])
         await setDoc(doc(db, "contacts", `${inputFieldsGlobal[0].contact.contactID}/messages/${inputFieldsGlobal[0].messageID}`), inputFieldsGlobal[0])
-        await setDoc(doc(db, "clients", `${inputFieldsGlobal[0].client.clientID}`), { updatedAt: Timestamp.fromDate(new Date(new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"}))), updatedBy: user.email }, { merge: true });  
+        await setDoc(doc(db, "clients", `${inputFieldsGlobal[0].client.clientID}`), { updatedAt: Timestamp.fromDate(new Date(new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"}))), updatedBy: "test@email.com" }, { merge: true });  
         setAlertVisible(false)
         clearMessageForm()
       }
