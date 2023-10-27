@@ -24,9 +24,9 @@ export default function RiderForm({ visible, handleVisibility,edit,rider }) {
     name: "",
     id: "",
     createdAt: "",
-    createdBy: user.email,
+    createdBy: "test@email.com",
     updatedAt: "",
-    updatedBy: user.email,
+    updatedBy: "test@email.com",
     lastName: "",
     number: "",
     email: "",
@@ -51,10 +51,10 @@ export default function RiderForm({ visible, handleVisibility,edit,rider }) {
         inputFieldsGlobal[0].id = orderid.generate()
         inputFieldsGlobal[0].riderID = `${inputFieldsGlobal[0].email}-${inputFieldsGlobal[0].id}`
         inputFieldsGlobal[0].createdAt = Timestamp.fromDate(new Date(new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"})))
-        inputFieldsGlobal[0].createdBy = user.email
+        inputFieldsGlobal[0].createdBy = "test@email.com"
       }
       inputFieldsGlobal[0].updatedAt = Timestamp.fromDate(new Date(new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"})))
-      inputFieldsGlobal[0].updatedBy = user.email
+      inputFieldsGlobal[0].updatedBy = "test@email.com"
       const snap = await getCountFromServer(query(
         collection(db, 'riders'), where("name", '==', inputFieldsGlobal[0].name), where("lastName", '==', inputFieldsGlobal[0].lastName),where("number", '==', inputFieldsGlobal[0].number)
       ))
@@ -81,9 +81,9 @@ export default function RiderForm({ visible, handleVisibility,edit,rider }) {
         name: "",
         id: "",
         createdAt: "",
-        createdBy: user.email,
+        createdBy: "test@email.com",
         updatedAt: "",
-        updatedBy: user.email,
+        updatedBy: "test@email.com",
         lastName: "",
         number: "",
         email: "",
