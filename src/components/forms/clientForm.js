@@ -19,9 +19,9 @@ export default function ClientForm({ visible, handleVisibility }) {
     name: "",
     id: "",
     createdAt: "",
-    createdBy: user.email,
+    createdBy: test@email.com,
     updatedAt: "",
-    updatedBy: user.email
+    updatedBy: test@email.com
   }]);
   const [alertVisible, setAlertVisible] = useState(false);
 
@@ -82,9 +82,9 @@ export default function ClientForm({ visible, handleVisibility }) {
       name: event.target.value.trim(),
       id: "",
       createdAt: "",
-      createdBy: user.email,
+      createdBy: test@email.com,
       updatedAt: "",
-      updatedBy: user.email
+      updatedBy: test@email.com
     }])
   }
 
@@ -95,9 +95,9 @@ export default function ClientForm({ visible, handleVisibility }) {
       name: "",
       id: "",
       createdAt: "",
-      createdBy: user.email,
+      createdBy: test@email.com,
       updatedAt: "",
-      updatedBy: user.email
+      updatedBy: test@email.com
     }])
     setAlertVisible(false)
   }
