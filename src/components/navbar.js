@@ -33,7 +33,7 @@ export function Navbar(){
     }
   }
 
-  if (user === null) {
+  /*if (user === null) {
     return (
       <div className='bg-gray-200 w-full'>
       <nav class="flex flex-wrap border-b border-gray-200 py-1.5">
@@ -51,7 +51,7 @@ export function Navbar(){
       </div>  
     );
   }
-  else return ( 
+  else*/ return ( 
       <div className='bg-gray-200 w-full'>
       <nav class="flex flex-wrap border-b border-gray-200">
         <img  src={logo} style={{display:"block", height:"25px", marginTop:"15px", marginLeft:"10px", marginRight:"15px"}}/>
