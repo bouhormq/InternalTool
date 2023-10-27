@@ -26,8 +26,8 @@ export function RecipientForm({visible, handleVisibility, edit, recipient}) {
         contacts:[],
         updatedAt: "",
         createdAt: "",
-        updatedBy: user.email,
-        createdBy: user.email
+        updatedBy: "test@email.com",
+        createdBy: "test@email.com"
       }]);
 
       useEffect(() => {
@@ -58,7 +58,7 @@ export function RecipientForm({visible, handleVisibility, edit, recipient}) {
         if(checkEmptyValues(inputFields[0])){
           if(edit){
             inputFields[0].updatedAt = Timestamp.fromDate(new Date(new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"})))
-            inputFields[0].updatedBy = user.email
+            inputFields[0].updatedBy = "test@email.com"
             for(var i = 0; i < contactsToUpdate.length; ++i){
               const docRef = doc(db, "contacts", `${contactsToUpdate[i].contactID}`); 
               const docSnap = await getDoc(docRef);
@@ -70,10 +70,10 @@ export function RecipientForm({visible, handleVisibility, edit, recipient}) {
                   recipients.splice(j,1)
                   contact.recipients = recipients
                   contact.updatedAt = Timestamp.fromDate(new Date(new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"})))
-                  contact.updatedBy = user.email
+                  contact.updatedBy = "test@email.com"
                 }
                 await setDoc(doc(db, "clients", `${inputFields[0].client.clientID}/contacts/${contactsToUpdate[i].contactID}`), contact)
-                await setDoc(doc(db, "clients", `${inputFields[0].client.clientID}`), { updatedAt: Timestamp.fromDate(new Date(new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"}))), updatedBy: user.email }, { merge: true });  
+                await setDoc(doc(db, "clients", `${inputFields[0].client.clientID}`), { updatedAt: Timestamp.fromDate(new Date(new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"}))), updatedBy: "test@email.com" }, { merge: true });  
                 await setDoc(doc(db, "contacts", `${contactsToUpdate[i].contactID}`), contact)
               }
             }
@@ -84,16 +84,16 @@ export function RecipientForm({visible, handleVisibility, edit, recipient}) {
             if (docSnap.exists()) {
               let contact = docSnap.data()
               contact.updatedAt = Timestamp.fromDate(new Date(new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"})))
-              contact.updatedBy = user.email
+              contact.updatedBy = "test@email.com"
               contact.recipients.push({name:inputFields[0].name, availableWarehouses:inputFields[0].availableWarehouses,shippingAddress:inputFields[0].shippingAddress, recipientID: inputFields[0].recipientID})
               await setDoc(doc(db, "clients", `${inputFields[0].client.clientID}/contacts/${inputFields[0].contacts[i].contactID}`), contact)
-              await setDoc(doc(db, "clients", `${inputFields[0].client.clientID}`), { updatedAt: Timestamp.fromDate(new Date(new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"}))), updatedBy: user.email }, { merge: true });  
+              await setDoc(doc(db, "clients", `${inputFields[0].client.clientID}`), { updatedAt: Timestamp.fromDate(new Date(new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"}))), updatedBy: "test@email.com" }, { merge: true });  
               await setDoc(doc(db, "contacts", `${inputFields[0].contacts[i].contactID}`), contact)
             }
           }
           await setDoc(doc(db, "recipients", inputFields[0].recipientID), inputFields[0]);
           await setDoc(doc(db, "clients", `${inputFields[0].client.clientID}/recipients/${inputFields[0].recipientID}`), inputFields[0]) 
-          await setDoc(doc(db, "clients", `${inputFields[0].client.clientID}`), { updatedAt: Timestamp.fromDate(new Date(new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"}))), updatedBy: user.email }, { merge: true });  
+          await setDoc(doc(db, "clients", `${inputFields[0].client.clientID}`), { updatedAt: Timestamp.fromDate(new Date(new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"}))), updatedBy: "test@email.com" }, { merge: true });  
           setAlertVisible(false)
           clearRecipientForm()
         }
@@ -114,8 +114,8 @@ export function RecipientForm({visible, handleVisibility, edit, recipient}) {
         contacts:[],
         updatedAt: "",
         createdAt: "",
-        updatedBy: user.email,
-        createdBy: user.email
+        updatedBy: "test@email.com",
+        createdBy: "test@email.com"
       }])
       handleVisibility(false)
       setAlertVisible(false)
