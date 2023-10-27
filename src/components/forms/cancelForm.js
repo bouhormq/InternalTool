@@ -29,9 +29,9 @@ const orderid = require('order-id')('key');
   const handleSubmit = async (e,sms) => {
     delivery.cancelReason = inputFields
     delivery.comments = inputFields1
-    delivery.cancelledBy = user.email
+    delivery.cancelledBy = "test@email.com"
     delivery.cancelledAt = Timestamp.fromDate(new Date(new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"})))
-    delivery.updatedBy = user.email
+    delivery.updatedBy = "test@email.com"
     delivery.updatedAt = Timestamp.fromDate(new Date(new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"})))
     e.preventDefault();
     if (delivery.cancelReason) {
@@ -62,9 +62,9 @@ const orderid = require('order-id')('key');
         await setDoc(doc(db, "clients", `${delivery.client.clientID}/contacts/${delivery.contact.contactID}/flows/${delivery.flowID}`), delivery)
         FlowToInventory(delivery,null,"failure",null, user)
       }
-      await setDoc(doc(db, "clients", `${delivery.client.clientID}`), { updatedAt: Timestamp.fromDate(new Date(new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"}))), updatedBy: user.email }, { merge: true }); 
-      await setDoc(doc(db, "contacts", `${delivery.contact.contactID}`), { updatedAt: Timestamp.fromDate(new Date(new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"}))), updatedBy: user.email }, { merge: true });  
-      await setDoc(doc(db, "clients", `${delivery.client.clientID}/contacts/${delivery.contact.contactID}`), { updatedAt: Timestamp.fromDate(new Date(new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"}))), updatedBy: user.email }, { merge: true });   
+      await setDoc(doc(db, "clients", `${delivery.client.clientID}`), { updatedAt: Timestamp.fromDate(new Date(new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"}))), updatedBy: "test@email.com" }, { merge: true }); 
+      await setDoc(doc(db, "contacts", `${delivery.contact.contactID}`), { updatedAt: Timestamp.fromDate(new Date(new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"}))), updatedBy: "test@email.com" }, { merge: true });  
+      await setDoc(doc(db, "clients", `${delivery.client.clientID}/contacts/${delivery.contact.contactID}`), { updatedAt: Timestamp.fromDate(new Date(new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"}))), updatedBy: "test@email.com" }, { merge: true });   
       handleFlowVisibility(false)
       handleVisibility(false)
     }
@@ -86,7 +86,7 @@ const orderid = require('order-id')('key');
         to: delivery.contact.number,
         client: delivery.client,
         daily: false,
-        createdBy: user.email,
+        createdBy: "test@email.com",
         createdAt: Timestamp.fromDate(new Date(new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"}))),
         type: 'text',
         content: {
