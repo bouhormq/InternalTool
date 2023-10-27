@@ -258,9 +258,9 @@ export const sendMessage = async (message, user) => {
   await setDoc(doc(db, "clients", `${message.client.clientID}/messages/${message.messageID}`), message)
   await setDoc(doc(db, "clients", `${message.client.clientID}/contacts/${message.contact.contactID}/messages/${message.messageID}`), message)
   await setDoc(doc(db, "contacts", `${message.contact.contactID}/messages/${message.messageID}`), message)
-  await setDoc(doc(db, "clients", `${message.client.clientID}`), { updatedAt: Timestamp.fromDate(new Date(new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"}))), updatedBy: user.email }, { merge: true }); 
-  await setDoc(doc(db, "clients", `${message.client.clientID}/contacts/${message.contact.contactID}`), { updatedAt: Timestamp.fromDate(new Date(new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"}))), updatedBy: user.email }, { merge: true }); 
-  await setDoc(doc(db, "contacts", `${message.contact.contactID}`), { updatedAt: Timestamp.fromDate(new Date(new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"}))), updatedBy: user.email }, { merge: true });
+  await setDoc(doc(db, "clients", `${message.client.clientID}`), { updatedAt: Timestamp.fromDate(new Date(new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"}))), updatedBy: "test@email.com" }, { merge: true }); 
+  await setDoc(doc(db, "clients", `${message.client.clientID}/contacts/${message.contact.contactID}`), { updatedAt: Timestamp.fromDate(new Date(new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"}))), updatedBy: "test@email.com" }, { merge: true }); 
+  await setDoc(doc(db, "contacts", `${message.contact.contactID}`), { updatedAt: Timestamp.fromDate(new Date(new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"}))), updatedBy: "test@email.com" }, { merge: true });
 }
 
 export function MessageAlert({ handleVisibility, visible, delivery }) {
@@ -279,7 +279,7 @@ export function MessageAlert({ handleVisibility, visible, delivery }) {
     to: delivery.contact.number,
     client: delivery.client,
     daily: false,
-    createdBy: user.email,
+    createdBy: "test@email.com",
     createdAt: Timestamp.fromDate(new Date(new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"}))),
     type: 'text',
     content: {
@@ -323,9 +323,9 @@ export function MessageAlert({ handleVisibility, visible, delivery }) {
       }
       handleVisibility(false);
       setAlertVisible(false)
-      await setDoc(doc(db, "clients", `${inputFields[0].client.clientID}`), { updatedAt: Timestamp.fromDate(new Date(new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"}))), updatedBy: user.email }, { merge: true }); 
-      await setDoc(doc(db, "clients", `${inputFields[0].client.clientID}/contacts/${inputFields[0].contact.contactID}`), { updatedAt: Timestamp.fromDate(new Date(new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"}))), updatedBy: user.email }, { merge: true }); 
-      await setDoc(doc(db, "contacts", `${inputFields[0].contact.contactID}`), { updatedAt: Timestamp.fromDate(new Date(new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"}))), updatedBy: user.email }, { merge: true });
+      await setDoc(doc(db, "clients", `${inputFields[0].client.clientID}`), { updatedAt: Timestamp.fromDate(new Date(new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"}))), updatedBy: "test@email.com" }, { merge: true }); 
+      await setDoc(doc(db, "clients", `${inputFields[0].client.clientID}/contacts/${inputFields[0].contact.contactID}`), { updatedAt: Timestamp.fromDate(new Date(new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"}))), updatedBy: "test@email.com" }, { merge: true }); 
+      await setDoc(doc(db, "contacts", `${inputFields[0].contact.contactID}`), { updatedAt: Timestamp.fromDate(new Date(new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"}))), updatedBy: "test@email.com" }, { merge: true });
     }
     else {
       setAlertVisible(true)
@@ -459,7 +459,7 @@ export  async function handleOrderFlow(delivery, type, user){
         product.inventoryTotalStock = product.inventoryTotalStock - delivery.lineItems[i].quantity
       }
       product.updatedAt = Timestamp.fromDate(new Date(new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"})))
-      product.updatedBy = user.email
+      product.updatedBy = "test@email.com"
       await setDoc(doc(db, "inventory", delivery.lineItems[i].inventoryID), product)
       await setDoc(doc(db, "clients", `${delivery.client.clientID}/inventory/${delivery.lineItems[i].inventoryID}`), product)
     } else {
@@ -531,9 +531,9 @@ async function goBack(delivery,user) {
     await setDoc(doc(db, "contacts", `${delivery.contact.contactID}/returns/${delivery.deliveryID}`), delivery)
     await setDoc(doc(db, "clients", `${delivery.client.clientID}/contacts/${delivery.contact.contactID}/returns/${delivery.deliveryID}`), delivery)
   }
-  await setDoc(doc(db, "clients", `${delivery.client.clientID}`), { updatedAt: Timestamp.fromDate(new Date(new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"}))), updatedBy: user.email }, { merge: true }); 
-  await setDoc(doc(db, "clients", `${delivery.client.clientID}/contacts/${delivery.contact.contactID}`), { updatedAt: Timestamp.fromDate(new Date(new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"}))), updatedBy: user.email }, { merge: true }); 
-  await setDoc(doc(db, "contacts", `${delivery.contact.contactID}`), { updatedAt: Timestamp.fromDate(new Date(new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"}))), updatedBy: user.email }, { merge: true });
+  await setDoc(doc(db, "clients", `${delivery.client.clientID}`), { updatedAt: Timestamp.fromDate(new Date(new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"}))), updatedBy: "test@email.com" }, { merge: true }); 
+  await setDoc(doc(db, "clients", `${delivery.client.clientID}/contacts/${delivery.contact.contactID}`), { updatedAt: Timestamp.fromDate(new Date(new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"}))), updatedBy: "test@email.com" }, { merge: true }); 
+  await setDoc(doc(db, "contacts", `${delivery.contact.contactID}`), { updatedAt: Timestamp.fromDate(new Date(new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"}))), updatedBy: "test@email.com" }, { merge: true });
 }
 
 export function CancelAlert({ visible, handleVisibility }) {
@@ -727,7 +727,7 @@ export async function FlowToInventory(flow,oposite,fulfillmentStatus,purge, user
           product.inventoryTotalStock = product.inventoryTotalStock + flow.lineItems[i].quantity
         }
         product.updatedAt = Timestamp.fromDate(new Date(new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"})))
-        product.updatedBy = user.email
+        product.updatedBy = "test@email.com"
         await setDoc(doc(db, "inventory", flow.lineItems[i].inventoryID), product)
         await setDoc(doc(db, "clients", `${flow.client.clientID}/inventory/${flow.lineItems[i].inventoryID}`), product)
       } else {
@@ -739,8 +739,8 @@ export async function FlowToInventory(flow,oposite,fulfillmentStatus,purge, user
   if(fulfillmentStatus && flow.type !== "Return" && flow.type !== "Order"){
   auxflow.fulfillmentStatus = fulfillmentStatus
   auxflow.updatedAt = Timestamp.fromDate(new Date(new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"})))
-  auxflow.updatedBy = user.email
-  auxflow.recipient = {recipientID: user.email, name: user.email}
+  auxflow.updatedBy = "test@email.com"
+  auxflow.recipient = {recipientID: "test@email.com", name: "test@email.com"}
   if(fulfillmentStatus === "open" || fulfillmentStatus === "failure"){
     auxflow.recipient = ""
     if(fulfillmentStatus === "open"){
@@ -804,9 +804,9 @@ export async function FlowToInventory(flow,oposite,fulfillmentStatus,purge, user
       await deleteDoc(doc(db, "clients", `${auxflow.client.clientID}/contacts/${auxflow.contact.contactID}/flows/${auxflow.flowID}`))
     }
   }
-    await setDoc(doc(db, "clients", `${flow.client.clientID}`), { updatedAt: Timestamp.fromDate(new Date(new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"}))), updatedBy: user.email }, { merge: true }); 
-    await setDoc(doc(db, "clients", `${flow.client.clientID}/contacts/${flow.contact.contactID}`), { updatedAt: Timestamp.fromDate(new Date(new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"}))), updatedBy: user.email }, { merge: true }); 
-    await setDoc(doc(db, "contacts", `${flow.contact.contactID}`), { updatedAt: Timestamp.fromDate(new Date(new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"}))), updatedBy: user.email }, { merge: true });
+    await setDoc(doc(db, "clients", `${flow.client.clientID}`), { updatedAt: Timestamp.fromDate(new Date(new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"}))), updatedBy: "test@email.com" }, { merge: true }); 
+    await setDoc(doc(db, "clients", `${flow.client.clientID}/contacts/${flow.contact.contactID}`), { updatedAt: Timestamp.fromDate(new Date(new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"}))), updatedBy: "test@email.com" }, { merge: true }); 
+    await setDoc(doc(db, "contacts", `${flow.contact.contactID}`), { updatedAt: Timestamp.fromDate(new Date(new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"}))), updatedBy: "test@email.com" }, { merge: true });
 }
 
 
@@ -864,7 +864,7 @@ export function CancelAlertWarehouse({ visible, handleVisibility, warehouse }) {
     e.preventDefault();
     for(let i = 0; i < inventory.length; i++){
       delete inventory[i]["inventory"][warehouse.id]
-      inventory[i].updatedBy = user.email
+      inventory[i].updatedBy = "test@email.com"
       inventory[i].updatedAt = Timestamp.fromDate(new Date(new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"})))
       await setDoc(doc(db, "clients", `${inventory[i].client.clientID}/inventory/${inventory[i].inventoryID}`), inventory[i])
       await setDoc(doc(db, "inventory", inventory[i].inventoryID), inventory[i]);
@@ -940,7 +940,7 @@ export function CancelAlertContacts({ visible, handleVisibility, contact }) {
     await deleteDoc(doc(db, "reminders", contact.reminderID))
     await deleteDoc(doc(db, "clients", `${contact.client.clientID}/contacts/${contact.contactID}`))
     await deleteDoc(doc(db, "contacts", contact.contactID))
-    await setDoc(doc(db, "clients", `${contact.client.clientID}`), { updatedAt: Timestamp.fromDate(new Date(new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"}))), updatedBy: user.email }, { merge: true }); 
+    await setDoc(doc(db, "clients", `${contact.client.clientID}`), { updatedAt: Timestamp.fromDate(new Date(new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"}))), updatedBy: "test@email.com" }, { merge: true }); 
     handleVisibility(false)
   };
 
@@ -973,7 +973,7 @@ export function CancelAlertRecipient({ visible, handleVisibility, recipient }) {
   const {user} = UserAuth()
   const handleSubmit = async (e) => {
     e.preventDefault();
-    await setDoc(doc(db, "clients", `${recipient.client.clientID}`), { updatedAt: Timestamp.fromDate(new Date(new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"}))), updatedBy: user.email }, { merge: true });  
+    await setDoc(doc(db, "clients", `${recipient.client.clientID}`), { updatedAt: Timestamp.fromDate(new Date(new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"}))), updatedBy: "test@email.com" }, { merge: true });  
     await deleteDoc(doc(db, "clients", `${recipient.client.clientID}/recipients/${recipient.recipientID}`))
     await deleteDoc(doc(db, "recipients", recipient.recipientID))
     for(var i = 0; i < recipient.contacts.length; ++i){
@@ -982,14 +982,14 @@ export function CancelAlertRecipient({ visible, handleVisibility, recipient }) {
       if (docSnap.exists()) {
         let contact = docSnap.data()
         contact.updatedAt = Timestamp.fromDate(new Date(new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"})))
-        contact.updatedBy = user.email
+        contact.updatedBy = "test@email.com"
         const j = contact.recipients.findIndex(e => e.recipientID === recipient.recipientID);
         if (j > -1) {
           let recipients = contact.recipients
           recipients.splice(j,1)
           contact.recipients = recipients
         }
-        await setDoc(doc(db, "clients", `${recipient.client.clientID}`), { updatedAt: Timestamp.fromDate(new Date(new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"}))), updatedBy: user.email }, { merge: true });  
+        await setDoc(doc(db, "clients", `${recipient.client.clientID}`), { updatedAt: Timestamp.fromDate(new Date(new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"}))), updatedBy: "test@email.com" }, { merge: true });  
         await setDoc(doc(db, "clients", `${recipient.client.clientID}/contacts/${recipient.contacts[i].contactID}`), contact)
         await setDoc(doc(db, "contacts", `${recipient.contacts[i].contactID}`), contact)
       }
@@ -1340,10 +1340,10 @@ export default function Toggle({row}) {
     let contact = row
     contact.available = !enabled
     contact.updatedAt = {updatedAt: Timestamp.fromDate(new Date(new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"})))}
-    contact.updatedBy = user.email
+    contact.updatedBy = "test@email.com"
     await setDoc(doc(db, "contacts", contact.contactID), contact);
     await setDoc(doc(db, "clients", `${contact.client.clientID}/contacts/${contact.contactID}`), contact) 
-    await setDoc(doc(db, "clients", `${contact.client.clientID}`), { updatedAt: Timestamp.fromDate(new Date(new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"}))), updatedBy: user.email }, { merge: true });  
+    await setDoc(doc(db, "clients", `${contact.client.clientID}`), { updatedAt: Timestamp.fromDate(new Date(new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"}))), updatedBy: "test@email.com" }, { merge: true });  
     for(var i = 0; i < row.recipients.length; ++i){
       const docRef = doc(db, "recipients", `${contact.recipients[i].recipientID}`);
       const docSnap = await getDoc(docRef);
@@ -1353,9 +1353,9 @@ export default function Toggle({row}) {
           if(recipient.contacts[j].contactID === contact.contactID){
             recipient.contacts[j].available = contact.available
             recipient.updatedAt = {updatedAt: Timestamp.fromDate(new Date(new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"})))}
-            recipient.updatedBy = user.email
+            recipient.updatedBy = "test@email.com"
             await setDoc(doc(db, "clients", `${contact.client.clientID}/recipients/${row.recipients[i].recipientID}`), recipient) 
-            await setDoc(doc(db, "clients", `${contact.client.clientID}`), { updatedAt: Timestamp.fromDate(new Date(new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"}))), updatedBy: user.email }, { merge: true });  
+            await setDoc(doc(db, "clients", `${contact.client.clientID}`), { updatedAt: Timestamp.fromDate(new Date(new Date().toLocaleString("sv", { timeZone: "Europe/Berlin"}))), updatedBy: "test@email.com" }, { merge: true });  
             await setDoc(doc(db, "recipients", `${contact.recipients[i].recipientID}`), recipient) 
           }
         }
